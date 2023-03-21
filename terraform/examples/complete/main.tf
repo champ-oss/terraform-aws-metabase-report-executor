@@ -65,7 +65,7 @@ module "metabase" {
   zone_id             = data.aws_route53_zone.this.zone_id
   protect             = false
   https_egress_only   = false
-  ingress_cidr_blocks = ["0.0.0.0/0"]
+  ingress_cidr_blocks = ["10.0.0.0/8"]
 
   tags = {
     git     = local.git
