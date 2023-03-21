@@ -49,3 +49,6 @@ override.tf.json
 # Python
 venv/
 .coverage
+
+src/metabase-report-executor/target
+src/metabase-report-notifier/target
