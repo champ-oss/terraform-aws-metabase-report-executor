@@ -6,13 +6,17 @@ provider "aws" {
   region = "us-east-2"
 }
 
+locals {
+  git = "terraform-aws-metabase-report-executor"
+}
+
 data "aws_vpcs" "this" {
   tags = {
     purpose = "vega"
   }
 }
 
-data "aws_subnets" "this" {
+data "aws_subnets" "private" {
   tags = {
     purpose = "vega"
     Type    = "Private"
@@ -24,8 +28,53 @@ data "aws_subnets" "this" {
   }
 }
 
+data "aws_subnets" "public" {
+  tags = {
+    purpose = "vega"
+    Type    = "Public"
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpcs.this.ids[0]]
+  }
+}
+
+data "aws_route53_zone" "this" {
+  name = "oss.champtest.net."
+}
+
+module "acm" {
+  source            = "github.com/champ-oss/terraform-aws-acm.git?ref=v1.0.110-61ad6b7"
+  git               = local.git
+  domain_name       = "${local.git}.${data.aws_route53_zone.this.name}"
+  create_wildcard   = false
+  zone_id           = data.aws_route53_zone.this.zone_id
+  enable_validation = true
+}
+
+module "metabase" {
+  source              = "git::git@github.com:champ-oss/terraform-aws-metabase.git?ref=v1.0.67-6f1c100"
+  id                  = local.git
+  public_subnet_ids   = data.aws_subnets.public.ids
+  private_subnet_ids  = data.aws_subnets.private.ids
+  vpc_id              = data.aws_vpcs.this.ids[0]
+  domain              = "${local.git}.${data.aws_route53_zone.this.name}"
+  certificate_arn     = module.acm.arn
+  zone_id             = data.aws_route53_zone.this.zone_id
+  protect             = false
+  https_egress_only   = false
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+
+  tags = {
+    git     = local.git
+    cost    = "metabase"
+    creator = "terraform"
+  }
+}
+
 module "this" {
   source             = "../../"
-  private_subnet_ids = data.aws_subnets.this.ids
+  private_subnet_ids = data.aws_subnets.private.ids
   vpc_id             = data.aws_vpcs.this.ids[0]
 }
