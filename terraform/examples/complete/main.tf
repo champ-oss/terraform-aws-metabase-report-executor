@@ -7,7 +7,8 @@ provider "aws" {
 }
 
 locals {
-  git = "terraform-aws-metabase-report-executor"
+  git  = "terraform-aws-metabase-report-executor"
+  name = "metabase-report-executor"
 }
 
 data "aws_vpcs" "this" {
@@ -47,7 +48,7 @@ data "aws_route53_zone" "this" {
 module "acm" {
   source            = "github.com/champ-oss/terraform-aws-acm.git?ref=v1.0.110-61ad6b7"
   git               = local.git
-  domain_name       = "${local.git}.${data.aws_route53_zone.this.name}"
+  domain_name       = "${local.name}.${data.aws_route53_zone.this.name}"
   create_wildcard   = false
   zone_id           = data.aws_route53_zone.this.zone_id
   enable_validation = true
@@ -55,11 +56,11 @@ module "acm" {
 
 module "metabase" {
   source              = "github.com/champ-oss/terraform-aws-metabase.git?ref=v1.0.67-6f1c100"
-  id                  = local.git
+  id                  = local.name
   public_subnet_ids   = data.aws_subnets.public.ids
   private_subnet_ids  = data.aws_subnets.private.ids
   vpc_id              = data.aws_vpcs.this.ids[0]
-  domain              = "${local.git}.${data.aws_route53_zone.this.name}"
+  domain              = "${local.name}.${data.aws_route53_zone.this.name}"
   certificate_arn     = module.acm.arn
   zone_id             = data.aws_route53_zone.this.zone_id
   protect             = false
