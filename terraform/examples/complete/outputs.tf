@@ -1,6 +1,6 @@
-output "metabase_host" {
-  description = "Metabase Host"
-  value       = "https://${local.name}.${data.aws_route53_zone.this.name}"
+output "metabase_url" {
+  description = "Metabase url"
+  value       = local.metabase_url
 }
 
 output "metabase_username" {

@@ -11,5 +11,10 @@ module "lambda_executor" {
   enable_vpc         = true
   vpc_id             = var.vpc_id
   private_subnet_ids = var.private_subnet_ids
-  environment        = {}
+  environment = {
+    METABASE_URL      = var.metabase_url
+    METABASE_USERNAME = var.metabase_username
+    METABASE_PASSWORD = var.metabase_password
+    METABASE_CARD_ID  = var.metabase_card_id
+  }
 }

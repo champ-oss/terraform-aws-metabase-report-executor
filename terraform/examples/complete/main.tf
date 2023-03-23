@@ -10,6 +10,8 @@ locals {
   git            = "terraform-aws-metabase-report-executor"
   name           = "metabase-report-executor"
   metabase_email = "test@example.com"
+  metabase_host  = "${local.name}.${data.aws_route53_zone.this.name}"
+  metabase_url   = "https://${local.metabase_url}"
 }
 
 data "aws_vpcs" "this" {
@@ -49,7 +51,7 @@ data "aws_route53_zone" "this" {
 module "acm" {
   source            = "github.com/champ-oss/terraform-aws-acm.git?ref=v1.0.110-61ad6b7"
   git               = local.git
-  domain_name       = "${local.name}.${data.aws_route53_zone.this.name}"
+  domain_name       = local.metabase_host
   create_wildcard   = false
   zone_id           = data.aws_route53_zone.this.zone_id
   enable_validation = true
@@ -61,7 +63,7 @@ module "metabase" {
   public_subnet_ids   = data.aws_subnets.public.ids
   private_subnet_ids  = data.aws_subnets.private.ids
   vpc_id              = data.aws_vpcs.this.ids[0]
-  domain              = "${local.name}.${data.aws_route53_zone.this.name}"
+  domain              = local.metabase_host
   certificate_arn     = module.acm.arn
   zone_id             = data.aws_route53_zone.this.zone_id
   protect             = false
@@ -84,4 +86,8 @@ module "this" {
   source             = "../../"
   private_subnet_ids = data.aws_subnets.private.ids
   vpc_id             = data.aws_vpcs.this.ids[0]
+  metabase_card_id   = "1"
+  metabase_url       = local.metabase_url
+  metabase_password  = random_password.this.result
+  metabase_username  = local.metabase_email
 }
