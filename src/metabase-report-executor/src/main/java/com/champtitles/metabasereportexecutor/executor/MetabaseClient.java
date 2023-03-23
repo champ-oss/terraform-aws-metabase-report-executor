@@ -23,6 +23,13 @@ public class MetabaseClient {
     private final HttpClient httpClient;
     private String sessionId;
 
+    /**
+     * Create a MetabaseClient
+     *
+     * @param baseUrl  URL of the Metabase server
+     * @param email    login email
+     * @param password login password
+     */
     public MetabaseClient(String baseUrl, String email, String password) {
         this.baseUrl = baseUrl;
         this.email = email;
@@ -30,6 +37,29 @@ public class MetabaseClient {
         httpClient = HttpClient.newBuilder().build();
     }
 
+    /**
+     * Create a MetabaseClient
+     *
+     * @param baseUrl    URL of the Metabase server
+     * @param email      login email
+     * @param password   login password
+     * @param httpClient inject a HttpClient
+     */
+    public MetabaseClient(String baseUrl, String email, String password, HttpClient httpClient) {
+        this.baseUrl = baseUrl;
+        this.email = email;
+        this.password = password;
+        this.httpClient = httpClient;
+    }
+
+    /**
+     * Query the metabase server for session properties. This will include the setup token which will only
+     * be present if the server has not yet been initialized.
+     * <p>
+     * metabase.com/docs/latest/api/session#get-apisessionproperties
+     *
+     * @return metabase session properties
+     */
     public SessionPropertiesResponse getSessionProperties() {
         HttpRequest httpRequest = HttpRequest
                 .newBuilder()
@@ -46,6 +76,13 @@ public class MetabaseClient {
         }
     }
 
+    /**
+     * Complete the initial setup of the metabase server by creating a user and setting basic properties
+     * <p>
+     * metabase.com/docs/latest/api/setup#post-apisetup
+     *
+     * @param setupToken setup token obtained by querying the session properties API
+     */
     public void completeInitialSetup(String setupToken) {
         SetupRequest setupRequest = new SetupRequest(setupToken, email, password);
 
@@ -59,6 +96,13 @@ public class MetabaseClient {
         logger.info("setup response: {}", response);
     }
 
+    /**
+     * Log in to metabase with the configured email and password and store the session id
+     * <p>
+     * metabase.com/docs/latest/api/session#post-apisession
+     *
+     * @return session id (cookie) to be used for subsequent requests
+     */
     public String loginAndGetSession() {
         SessionRequest sessionRequest = new SessionRequest(email, password);
 
@@ -83,6 +127,15 @@ public class MetabaseClient {
         }
     }
 
+    /**
+     * Create a Card in Metabase
+     * <p>
+     * metabase.com/glossary/card
+     * metabase.com/docs/latest/api/card#post-apicard
+     *
+     * @param name name of the card to create
+     * @return id of the created card
+     */
     public String createCard(String name) {
         if (StringUtils.isBlank(sessionId)) {
             throw new RuntimeException("you must login before creating a card");
@@ -110,7 +163,19 @@ public class MetabaseClient {
         }
     }
 
-    public void queryCardGetXlsx(String cardId) {
+    /**
+     * Execute a query on a Metabase Card and return the results as XLSX data
+     * <p>
+     * metabase.com/docs/latest/api/card#post-apicardcard-idqueryexport-format
+     *
+     * @param cardId metabase card to query
+     * @return XLSX data
+     */
+    public String queryCardGetXlsx(String cardId) {
+        if (StringUtils.isBlank(sessionId)) {
+            throw new RuntimeException("you must login before querying a card");
+        }
+
         HttpRequest httpRequest = HttpRequest
                 .newBuilder()
                 .uri(createUri("/api/card/" + cardId + "/query/xlsx"))
@@ -119,8 +184,15 @@ public class MetabaseClient {
                 .build();
         String response = sendHttpRequest(httpRequest, 200);
         logger.info("query card response size: {} bytes", response.length());
+        return response;
     }
 
+    /**
+     * Generate a URI using the Metabase base URL and the supplied path
+     *
+     * @param path URL path relative to the Metabase server URL
+     * @return URI
+     */
     private URI createUri(String path) {
         try {
             return new URI(baseUrl + path);
@@ -130,6 +202,13 @@ public class MetabaseClient {
         }
     }
 
+    /**
+     * Send a HttpRequest, check the response status code, and return the response body
+     *
+     * @param httpRequest        pre-created request to send
+     * @param expectedStatusCode HTTP status code response expected
+     * @return HTTP response body as a string
+     */
     private String sendHttpRequest(HttpRequest httpRequest, Integer expectedStatusCode) {
         try {
             logger.info("sending HTTP {} request to {}", httpRequest.method(), httpRequest.uri());
@@ -149,6 +228,12 @@ public class MetabaseClient {
         }
     }
 
+    /**
+     * Serialize the given Record object as JSON string and return a HttpRequest body
+     *
+     * @param e Record object to serialize as JSON
+     * @return HttpRequest body
+     */
     private <T> HttpRequest.BodyPublisher createBody(Record e) {
         try {
             return HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(e));
