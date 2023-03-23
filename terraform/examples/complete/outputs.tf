@@ -5,7 +5,7 @@ output "metabase_host" {
 
 output "metabase_username" {
   description = "Metabase username"
-  value       = local.metabaseEmail
+  value       = local.metabase_email
 }
 
 output "metabase_password" {

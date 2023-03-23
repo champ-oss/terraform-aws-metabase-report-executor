@@ -78,4 +78,4 @@ jobs:
             echo $key=$value
             export $key=$value
           done
-          cd .. && bash test.sh
+          cd ../../../ && bash test.sh

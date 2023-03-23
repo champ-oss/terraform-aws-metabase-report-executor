@@ -7,9 +7,9 @@ provider "aws" {
 }
 
 locals {
-  git           = "terraform-aws-metabase-report-executor"
-  name          = "metabase-report-executor"
-  metabaseEmail = "test@example.com"
+  git            = "terraform-aws-metabase-report-executor"
+  name           = "metabase-report-executor"
+  metabase_email = "test@example.com"
 }
 
 data "aws_vpcs" "this" {
