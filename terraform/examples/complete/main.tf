@@ -55,7 +55,7 @@ module "acm" {
 }
 
 module "metabase" {
-  source              = "github.com/champ-oss/terraform-aws-metabase.git?ref=develop"
+  source              = "github.com/champ-oss/terraform-aws-metabase.git?ref=33c32cb500233bd64580aef5fb72b31236dcac5b"
   id                  = local.name
   public_subnet_ids   = data.aws_subnets.public.ids
   private_subnet_ids  = data.aws_subnets.private.ids
