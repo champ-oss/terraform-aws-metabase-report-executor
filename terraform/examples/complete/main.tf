@@ -7,8 +7,9 @@ provider "aws" {
 }
 
 locals {
-  git  = "terraform-aws-metabase-report-executor"
-  name = "metabase-report-executor"
+  git           = "terraform-aws-metabase-report-executor"
+  name          = "metabase-report-executor"
+  metabaseEmail = "test@example.com"
 }
 
 data "aws_vpcs" "this" {
@@ -65,13 +66,18 @@ module "metabase" {
   zone_id             = data.aws_route53_zone.this.zone_id
   protect             = false
   https_egress_only   = false
-  ingress_cidr_blocks = ["10.0.0.0/8"]
+  ingress_cidr_blocks = ["0.0.0.0/0"]
 
   tags = {
     git     = local.git
     cost    = "metabase"
     creator = "terraform"
   }
+}
+
+resource "random_password" "this" {
+  length  = 20
+  special = false
 }
 
 module "this" {
