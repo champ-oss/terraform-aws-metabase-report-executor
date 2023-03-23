@@ -11,7 +11,7 @@ locals {
   name           = "metabase-report-executor"
   metabase_email = "test@example.com"
   metabase_host  = "${local.name}.${data.aws_route53_zone.this.name}"
-  metabase_url   = "https://${local.metabase_url}"
+  metabase_url   = "https://${local.metabase_host}"
 }
 
 data "aws_vpcs" "this" {
