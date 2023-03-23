@@ -75,7 +75,6 @@ jobs:
           for row in $(echo $(terraform output -json) | jq -c '. | to_entries[]'); do
             key=$(echo $row | jq -r '.key' | tr '[:lower:]' '[:upper:]')
             value=$(echo $row | jq -r '.value.value' | tr -d '\n[]" ')
-            echo $key=$value
             export $key=$value
           done
           cd ../../../ && bash test.sh
