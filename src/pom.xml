@@ -139,13 +139,13 @@
                     </configuration>
                     <executions>
                         <execution>
-                            <id>default-prepare-agent</id>
+                            <phase>initialize</phase>
                             <goals>
                                 <goal>prepare-agent</goal>
                             </goals>
                         </execution>
                         <execution>
-                            <id>jacoco-report</id>
+                            <id>report</id>
                             <phase>test</phase>
                             <goals>
                                 <goal>report</goal>
