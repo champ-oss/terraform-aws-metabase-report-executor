@@ -52,3 +52,7 @@ venv/
 
 src/metabase-report-executor/target
 src/metabase-report-notifier/target
+src/metabase-report-test/target
+
+dependency-reduced-pom.xml
+*.xlsx
