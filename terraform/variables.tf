@@ -29,6 +29,12 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
+variable "protect" {
+  description = "Enables deletion protection on eligible resources"
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Map of tags to assign to resources"
   type        = map(string)

@@ -3,6 +3,11 @@ output "account_id" {
   value       = data.aws_caller_identity.this.account_id
 }
 
+output "bucket" {
+  description = "S3 bucket name"
+  value       = module.s3.bucket
+}
+
 output "aws_region" {
   description = "AWS Region"
   value       = data.aws_region.this.name

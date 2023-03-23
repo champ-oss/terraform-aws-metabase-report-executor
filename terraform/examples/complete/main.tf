@@ -90,4 +90,5 @@ module "this" {
   metabase_url       = local.metabase_url
   metabase_password  = random_password.this.result
   metabase_username  = local.metabase_email
+  protect            = false
 }

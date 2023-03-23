@@ -12,6 +12,7 @@ module "lambda_executor" {
   vpc_id             = var.vpc_id
   private_subnet_ids = var.private_subnet_ids
   environment = {
+    BUCKET            = module.s3.bucket
     METABASE_URL      = var.metabase_url
     METABASE_USERNAME = var.metabase_username
     METABASE_PASSWORD = var.metabase_password

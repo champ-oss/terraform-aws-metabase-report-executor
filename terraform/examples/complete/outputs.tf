@@ -1,3 +1,8 @@
+output "bucket" {
+  description = "S3 bucket name"
+  value       = module.this.bucket
+}
+
 output "metabase_url" {
   description = "Metabase url"
   value       = local.metabase_url
