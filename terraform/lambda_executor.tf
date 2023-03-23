@@ -19,3 +19,8 @@ module "lambda_executor" {
     METABASE_CARD_ID  = var.metabase_card_id
   }
 }
+
+resource "aws_iam_role_policy_attachment" "lambda_executor" {
+  policy_arn = aws_iam_policy.this.arn
+  role       = module.lambda_executor.role_name
+}
