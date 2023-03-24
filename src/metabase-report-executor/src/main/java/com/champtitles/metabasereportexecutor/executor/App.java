@@ -5,9 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
-public class App implements RequestHandler<Map<String, String>, String> {
+public class App implements RequestHandler<Object, Object> {
 
     private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
 
@@ -25,7 +23,7 @@ public class App implements RequestHandler<Map<String, String>, String> {
     }
 
     @Override
-    public String handleRequest(Map<String, String> event, Context context) {
+    public String handleRequest(Object event, Context context) {
         logger.info("logging in to metabase: {}", metabaseUrl);
         metabaseClient.loginAndGetSession();
 
