@@ -33,14 +33,14 @@ public class App implements RequestHandler<Map<String, String>, String> {
         metabaseClient.loginAndGetSession();
 
         logger.info("running query for card: {}", metabaseCardId);
-        String xlsxBody = metabaseClient.queryCardGetXlsx(metabaseCardId);
+        byte[] xlsxBody = metabaseClient.queryCardGetXlsx(metabaseCardId);
 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key("test1.xlsx")
                 .build();
 
-        s3Client.putObject(objectRequest, RequestBody.fromString(xlsxBody));
+        s3Client.putObject(objectRequest, RequestBody.fromBytes(xlsxBody));
         return null;
     }
 
