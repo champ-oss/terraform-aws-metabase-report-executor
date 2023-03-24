@@ -36,6 +36,8 @@ public class MetabaseClient {
         this.baseUrl = baseUrl;
         this.email = email;
         this.password = password;
+
+        System.setProperty("jdk.httpclient.keepalive.timeout", "5");
         httpClient = HttpClient.newBuilder().version(HTTP_1_1).build();
     }
 
