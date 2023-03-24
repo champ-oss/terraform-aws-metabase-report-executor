@@ -35,6 +35,12 @@ variable "protect" {
   default     = true
 }
 
+variable "schedule_expression" {
+  description = "schedule expression using cron"
+  type        = string
+  default     = "cron(0 4 * * ? *)"
+}
+
 variable "tags" {
   description = "Map of tags to assign to resources"
   type        = map(string)
