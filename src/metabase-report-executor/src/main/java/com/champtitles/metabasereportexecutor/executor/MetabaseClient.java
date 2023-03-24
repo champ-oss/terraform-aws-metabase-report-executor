@@ -45,7 +45,7 @@ public class MetabaseClient {
      * @param password   login password
      * @param httpClient inject a HttpClient
      */
-    public MetabaseClient(String baseUrl, String email, String password, HttpClient httpClient) {
+    MetabaseClient(String baseUrl, String email, String password, HttpClient httpClient) {
         this.baseUrl = baseUrl;
         this.email = email;
         this.password = password;
