@@ -14,6 +14,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import static java.net.http.HttpClient.Version.HTTP_1_1;
+
 public class MetabaseClient {
     private static final Logger logger = LoggerFactory.getLogger(MetabaseClient.class.getName());
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -34,7 +36,7 @@ public class MetabaseClient {
         this.baseUrl = baseUrl;
         this.email = email;
         this.password = password;
-        httpClient = HttpClient.newBuilder().build();
+        httpClient = HttpClient.newBuilder().version(HTTP_1_1).build();
     }
 
     /**
