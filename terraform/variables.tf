@@ -47,6 +47,12 @@ variable "tags" {
   default     = {}
 }
 
+variable "timeout" {
+  description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#timeout"
+  type        = number
+  default     = 900
+}
+
 variable "vpc_id" {
   description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group#vpc_id"
   type        = string

@@ -13,6 +13,7 @@ module "lambda_executor" {
   private_subnet_ids  = var.private_subnet_ids
   enable_cw_event     = true
   schedule_expression = var.schedule_expression
+  timeout             = var.timeout
   environment = {
     BUCKET            = module.s3.bucket
     METABASE_URL      = var.metabase_url

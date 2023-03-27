@@ -187,7 +187,7 @@ public class MetabaseClient {
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build();
         byte[] response = sendHttpRequestGetBytes(httpRequest, 200);
-        logger.info("query card response size: {} bytes", response.length);
+        logger.info("query card response size in bytes={}", response.length);
         return response;
     }
 
