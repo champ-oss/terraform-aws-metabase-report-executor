@@ -1,0 +1,91 @@
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+
+env:
+  SHA: ${{ github.sha }}
+  DOCKER_USERNAME: champtitles
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_HUB_TOKEN }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  SONAR_HOST_URL: https://sonarcloud.io
+
+defaults:
+  run:
+    shell: bash
+    working-directory: src
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: 'maven'
+
+      - name: Cache Maven repository
+        uses: actions/cache@v3
+        with:
+          path: "${{ github.workspace }}/repository"
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: maven test
+        run: mvn -B test -Dmaven.test.skip=false -DskipTests=false
+
+      - name: Generate Surefire Report
+        if: ${{ always() }}
+        run: mvn -B surefire-report:report -DskipTests=true -Dmaven.test.skip=true
+
+      - name: Post Surefire Report
+        if: ${{ always() }}
+        uses: ScaCap/action-surefire-report@v1.0.13
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: maven build
+        run: mvn compile package dependency:copy-dependencies -DincludeScope=runtime
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2.1.0
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Build and push Executor Docker image
+        uses: docker/build-push-action@v4.0.0
+        with:
+          context: src/metabase-report-executor
+          push: true
+          tags: champtitles/metabase-report-executor:${{ env.SHA }}
+
+      - name: Build and push Notifier Docker image
+        uses: docker/build-push-action@v4.0.0
+        with:
+          context: src/metabase-report-notifier
+          push: true
+          tags: champtitles/metabase-report-notifier:${{ env.SHA }}
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          projectBaseDir: src
+          args: >
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.organization=champ-oss
+            -Dsonar.projectKey=terraform-aws-metabase-report-executor_champ-oss
+            -Dsonar.binaries=build/classes
+            -Dsonar.scm.provider=git
+            -Dsonar.exclusions=**/src/test/**,src/test/**
+            -Dsonar.language=java
+            -Dsonar.tests=junit
+            -Dsonar.test.inclusions=**/*Test.java
+            -Dsonar.tests=.
+            -Dsonar.java.binaries=/tmp

@@ -1,0 +1,8 @@
+package com.champtitles.metabasereportexecutor.executor.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record SessionPropertiesResponse(@JsonProperty("setup-token") String setupToken) {
+}
