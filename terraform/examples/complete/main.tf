@@ -46,7 +46,7 @@ data "aws_route53_zone" "this" {
 }
 
 module "acm" {
-  source            = "github.com/champ-oss/terraform-aws-acm.git?ref=v1.0.110-61ad6b7"
+  source            = "github.com/champ-oss/terraform-aws-acm.git?ref=v1.0.111-28fcc7c"
   git               = local.git
   domain_name       = "${local.name}.${data.aws_route53_zone.this.name}"
   create_wildcard   = false
