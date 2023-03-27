@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -64,6 +65,9 @@ public class App {
 
     }
 
+    /**
+     * Invoke the AWS Lambda function for the report executor
+     */
     private static void invokeExecutorLambda() {
         LambdaClient awsLambda = LambdaClient.builder()
                 .region(Region.of(awsRegion))
@@ -71,9 +75,16 @@ public class App {
                 .build();
         InvokeRequest request = InvokeRequest.builder().functionName(executorFunctionName).build();
         InvokeResponse invokeResponse = awsLambda.invoke(request);
-        logger.info("invoke response: {}", invokeResponse.statusCode());
+        logger.info("invoke response statusCode={}", invokeResponse.statusCode());
+
+        byte[] decodedBytes = Base64.getDecoder().decode(invokeResponse.logResult());
+        String decodedString = new String(decodedBytes);
+        logger.info("invoke log result: {}", decodedString);
     }
 
+    /**
+     * List and return the object keys in the report output S3 bucket
+     */
     private static List<String> listS3Objects() {
         S3Client s3Client = S3Client.builder().build();
         ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder().bucket(bucket).build();
@@ -88,6 +99,9 @@ public class App {
         return objects;
     }
 
+    /**
+     * Download and open the XLSX file from S3 and return the number of rows
+     */
     private static int getXlsxRowCount(String s3Key) {
         logger.info("downloading file s3://{}/{}", bucket, s3Key);
         S3Client s3Client = S3Client.builder().build();
