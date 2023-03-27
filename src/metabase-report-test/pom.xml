@@ -10,6 +10,12 @@
     <artifactId>metabase-report-test</artifactId>
     <packaging>jar</packaging>
     <dependencies>
+        <!-- Amazon -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>lambda</artifactId>
+        </dependency>
+
         <!-- CHAMP Libraries -->
         <dependency>
             <groupId>com.champtitles</groupId>

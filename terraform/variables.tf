@@ -38,7 +38,7 @@ variable "protect" {
 variable "schedule_expression" {
   description = "schedule expression using cron"
   type        = string
-  default     = "cron(0 4 * * ? *)"
+  default     = "cron(0 7 * * ? *)"
 }
 
 variable "tags" {

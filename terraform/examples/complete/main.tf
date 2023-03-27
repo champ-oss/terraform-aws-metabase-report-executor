@@ -91,5 +91,5 @@ module "this" {
   metabase_password   = random_password.this.result
   metabase_username   = local.metabase_email
   protect             = false
-  schedule_expression = "cron(*/5 * * * ? *)"
+  schedule_expression = "cron(0 7 * * ? *)"
 }
