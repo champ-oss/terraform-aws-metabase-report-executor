@@ -15,6 +15,10 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>lambda</artifactId>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+        </dependency>
 
         <!-- CHAMP Libraries -->
         <dependency>

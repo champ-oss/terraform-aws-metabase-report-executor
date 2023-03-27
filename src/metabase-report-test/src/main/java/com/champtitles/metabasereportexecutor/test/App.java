@@ -10,6 +10,10 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 import software.amazon.awssdk.services.lambda.model.InvokeRequest;
 import software.amazon.awssdk.services.lambda.model.InvokeResponse;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 
 public class App {
@@ -20,6 +24,7 @@ public class App {
     private static final String metabasePassword = System.getenv("METABASE_PASSWORD");
     private static final String awsRegion = System.getenv("AWS_REGION");
     private static final String executorFunctionName = System.getenv("EXECUTOR_FUNCTION_NAME");
+    private static final String bucket = System.getenv("BUCKET");
 
     public static void main(String[] args) {
         MetabaseClient metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, metabasePassword);
@@ -41,9 +46,8 @@ public class App {
         logger.info("invoking executor lambda");
         invokeExecutorLambda();
 
-        //logger.info("checking xlsx file on s3");
-
-        //logger.info("cleaning up s3 test file");
+        logger.info("checking xlsx file in s3 bucket: {}", bucket);
+        listS3Objects();
     }
 
     private static void invokeExecutorLambda() {
@@ -54,5 +58,14 @@ public class App {
         InvokeRequest request = InvokeRequest.builder().functionName(executorFunctionName).build();
         InvokeResponse invokeResponse = awsLambda.invoke(request);
         logger.info("invoke response: {}", invokeResponse.statusCode());
+    }
+
+    private static void listS3Objects() {
+        S3Client s3Client = S3Client.builder().build();
+        ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder().bucket(bucket).build();
+        ListObjectsV2Response listObjectsV2Response = s3Client.listObjectsV2(listObjectsV2Request);
+        for (S3Object s3Object : listObjectsV2Response.contents()) {
+            logger.info("s3 object: key={} bytes={}", s3Object.key(), s3Object.size());
+        }
     }
 }
