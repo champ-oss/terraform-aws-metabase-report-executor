@@ -16,6 +16,7 @@ variable "metabase_username" {
 
 variable "metabase_password" {
   description = "Metabase password to use to connect"
+  sensitive   = true
   type        = string
 }
 
