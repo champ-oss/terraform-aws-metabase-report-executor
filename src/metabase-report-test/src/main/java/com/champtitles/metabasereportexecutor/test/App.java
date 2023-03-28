@@ -26,7 +26,6 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.io.IOException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -113,10 +112,6 @@ public class App {
         InvokeRequest request = InvokeRequest.builder().functionName(executorFunctionName).build();
         InvokeResponse invokeResponse = awsLambda.invoke(request);
         logger.info("invoke response statusCode={}", invokeResponse.statusCode());
-
-        byte[] decodedBytes = Base64.getDecoder().decode(invokeResponse.logResult());
-        String decodedString = new String(decodedBytes);
-        logger.info("invoke log result: {}", decodedString);
     }
 
     /**
