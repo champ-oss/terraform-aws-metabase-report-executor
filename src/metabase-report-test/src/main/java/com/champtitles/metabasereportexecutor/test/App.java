@@ -43,8 +43,8 @@ public class App {
     private static final String awsRegion = System.getenv("AWS_REGION");
     private static final String executorFunctionName = System.getenv("EXECUTOR_FUNCTION_NAME");
     private static final String bucket = System.getenv("BUCKET");
-    private static final int retries = 20;
-    private static final int delaySeconds = 5;
+    private static final int retries = 60;
+    private static final int delaySeconds = 10;
     private static final RetryConfig config = new RetryConfigBuilder()
             .retryOnAnyException()
             .withMaxNumberOfTries(retries)
