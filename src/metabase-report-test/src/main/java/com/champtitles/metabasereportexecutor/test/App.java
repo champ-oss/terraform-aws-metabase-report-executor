@@ -2,6 +2,12 @@ package com.champtitles.metabasereportexecutor.test;
 
 import com.champtitles.metabasereportexecutor.executor.MetabaseClient;
 import com.champtitles.metabasereportexecutor.executor.model.SessionPropertiesResponse;
+import com.evanlennick.retry4j.CallExecutorBuilder;
+import com.evanlennick.retry4j.Status;
+import com.evanlennick.retry4j.config.RetryConfig;
+import com.evanlennick.retry4j.config.RetryConfigBuilder;
+import com.evanlennick.retry4j.exception.RetriesExhaustedException;
+import com.evanlennick.retry4j.exception.UnexpectedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -18,10 +24,14 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.Callable;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -34,11 +44,21 @@ public class App {
     private static final String awsRegion = System.getenv("AWS_REGION");
     private static final String executorFunctionName = System.getenv("EXECUTOR_FUNCTION_NAME");
     private static final String bucket = System.getenv("BUCKET");
+    private static final int retries = 20;
+    private static final int delaySeconds = 5;
+    private static final RetryConfig config = new RetryConfigBuilder()
+            .retryOnSpecificExceptions(NoSuchElementException.class)
+            .withMaxNumberOfTries(retries)
+            .withDelayBetweenTries(delaySeconds, ChronoUnit.SECONDS)
+            .withFixedBackoff()
+            .build();
 
     public static void main(String[] args) {
         MetabaseClient metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, metabasePassword);
 
-        SessionPropertiesResponse sessionPropertiesResponse = metabaseClient.getSessionProperties();
+        SessionPropertiesResponse sessionPropertiesResponse = waitForSessionProperties(metabaseClient);
+        assertNotNull(sessionPropertiesResponse);
+
         if (StringUtils.isBlank(sessionPropertiesResponse.setupToken())) {
             logger.info("initial setup has already been completed");
         } else {
@@ -63,6 +83,24 @@ public class App {
             assertTrue(getXlsxRowCount(s3Key) >= 200);
         }
 
+    }
+
+    /**
+     * Get metabase session properties with retry logic
+     *
+     * @param metabaseClient instance of the Metabase Client library
+     * @return Metabase session properties
+     */
+    private static SessionPropertiesResponse waitForSessionProperties(MetabaseClient metabaseClient) {
+        Callable<SessionPropertiesResponse> callable = metabaseClient::getSessionProperties;
+
+        try {
+            Status<SessionPropertiesResponse> status = new CallExecutorBuilder().config(config).build().execute(callable);
+            return status.getResult();
+
+        } catch (RetriesExhaustedException | UnexpectedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
