@@ -14,9 +14,9 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 
 class MetabaseClientTest {
@@ -27,7 +27,10 @@ class MetabaseClientTest {
     private HttpClient httpClient;
 
     @Mock
-    private HttpResponse<String> httpResponse;
+    private HttpResponse<String> httpResponseString;
+
+    @Mock
+    private HttpResponse<byte[]> httpResponseBytes;
 
     @BeforeEach
     void setUp() {
@@ -37,9 +40,9 @@ class MetabaseClientTest {
 
     @Test
     void getSessionProperties_returnsSetupToken_with200Response() throws IOException, InterruptedException, URISyntaxException {
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn("""
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(200);
+        Mockito.when(httpResponseString.body()).thenReturn("""
                 {"setup-token":"abc123"}
                 """);
 
@@ -51,9 +54,9 @@ class MetabaseClientTest {
 
     @Test
     void getSessionProperties_throwsRuntimeException_withBadResponseBody() throws IOException, InterruptedException {
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn("foo");
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(200);
+        Mockito.when(httpResponseString.body()).thenReturn("foo");
 
         assertThrows(RuntimeException.class, () -> {
             metabaseClient.getSessionProperties();
@@ -63,9 +66,9 @@ class MetabaseClientTest {
 
     @Test
     void getSessionProperties_throwsRuntimeException_withUnexpectedStatusCode() throws IOException, InterruptedException {
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(400);
-        Mockito.when(httpResponse.body()).thenReturn("invalid request");
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(400);
+        Mockito.when(httpResponseString.body()).thenReturn("invalid request");
 
         assertThrows(RuntimeException.class, () -> {
             metabaseClient.getSessionProperties();
@@ -75,9 +78,9 @@ class MetabaseClientTest {
 
     @Test
     void completeInitialSetup() throws IOException, InterruptedException, URISyntaxException {
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn("done");
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(200);
+        Mockito.when(httpResponseString.body()).thenReturn("done");
 
         metabaseClient.completeInitialSetup("abc123");
 
@@ -109,9 +112,9 @@ class MetabaseClientTest {
 
     @Test
     void loginAndGetSession_returnsSessionId_with200Response() throws IOException, InterruptedException, URISyntaxException {
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn("""
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(200);
+        Mockito.when(httpResponseString.body()).thenReturn("""
                 {"id":"abc123"}
                 """);
 
@@ -133,9 +136,9 @@ class MetabaseClientTest {
 
     @Test
     void loginAndGetSession_throwsRuntimeException_withBadResponseBody() throws IOException, InterruptedException {
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn("foo");
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(200);
+        Mockito.when(httpResponseString.body()).thenReturn("foo");
 
         assertThrows(RuntimeException.class, () -> {
             metabaseClient.loginAndGetSession();
@@ -145,16 +148,16 @@ class MetabaseClientTest {
 
     @Test
     void createCard_returnsCardId_with202Response() throws IOException, InterruptedException {
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn("""
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(200);
+        Mockito.when(httpResponseString.body()).thenReturn("""
                 {"id":"abc123"}
                 """);
         metabaseClient.loginAndGetSession();
 
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(202);
-        Mockito.when(httpResponse.body()).thenReturn("""
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(202);
+        Mockito.when(httpResponseString.body()).thenReturn("""
                 {"id":"1"}
                 """);
         String cardId = metabaseClient.createCard("test");
@@ -172,16 +175,16 @@ class MetabaseClientTest {
 
     @Test
     void createCard_throwsRuntimeException_withBadResponseBody() throws IOException, InterruptedException {
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn("""
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(200);
+        Mockito.when(httpResponseString.body()).thenReturn("""
                 {"id":"abc123"}
                 """);
         metabaseClient.loginAndGetSession();
 
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn("foo");
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(200);
+        Mockito.when(httpResponseString.body()).thenReturn("foo");
 
         assertThrows(RuntimeException.class, () -> {
             metabaseClient.createCard("test");
@@ -191,26 +194,26 @@ class MetabaseClientTest {
 
     @Test
     void queryCardGetXlsx_returnsString_with200Response() throws IOException, InterruptedException, URISyntaxException {
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn("""
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponseString);
+        Mockito.when(httpResponseString.statusCode()).thenReturn(200);
+        Mockito.when(httpResponseString.body()).thenReturn("""
                 {"id":"abc123"}
                 """);
         metabaseClient.loginAndGetSession();
 
-        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        Mockito.when(httpResponse.statusCode()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn("data");
+        Mockito.when(httpClient.send(Mockito.any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofByteArray()))).thenReturn(httpResponseBytes);
+        Mockito.when(httpResponseBytes.statusCode()).thenReturn(200);
+        Mockito.when(httpResponseBytes.body()).thenReturn("data".getBytes(StandardCharsets.US_ASCII));
 
-        String data = metabaseClient.queryCardGetXlsx("1");
-        assertEquals("data", data);
+        byte[] data = metabaseClient.queryCardGetXlsx("1");
+        assertArrayEquals("data".getBytes(StandardCharsets.US_ASCII), data);
         HttpRequest expectedHttpRequest = HttpRequest
                 .newBuilder()
                 .uri(new URI("http://localhost:12345/api/card/1/query/xlsx"))
                 .header("X-Metabase-Session", "abc123")
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build();
-        Mockito.verify(this.httpClient, Mockito.times(1)).send(Mockito.eq(expectedHttpRequest), eq(HttpResponse.BodyHandlers.ofString()));
+        Mockito.verify(this.httpClient, Mockito.times(1)).send(Mockito.eq(expectedHttpRequest), eq(HttpResponse.BodyHandlers.ofByteArray()));
     }
 
     @Test

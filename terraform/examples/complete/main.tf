@@ -7,8 +7,11 @@ provider "aws" {
 }
 
 locals {
-  git  = "terraform-aws-metabase-report-executor"
-  name = "metabase-report-executor"
+  git            = "terraform-aws-metabase-report-executor"
+  name           = "metabase-report-executor"
+  metabase_email = "test@example.com"
+  metabase_host  = "${local.name}.${data.aws_route53_zone.this.name}"
+  metabase_url   = "https://${local.metabase_host}"
 }
 
 data "aws_vpcs" "this" {
@@ -48,24 +51,24 @@ data "aws_route53_zone" "this" {
 module "acm" {
   source            = "github.com/champ-oss/terraform-aws-acm.git?ref=v1.0.111-28fcc7c"
   git               = local.git
-  domain_name       = "${local.name}.${data.aws_route53_zone.this.name}"
+  domain_name       = local.metabase_host
   create_wildcard   = false
   zone_id           = data.aws_route53_zone.this.zone_id
   enable_validation = true
 }
 
 module "metabase" {
-  source              = "github.com/champ-oss/terraform-aws-metabase.git?ref=33c32cb500233bd64580aef5fb72b31236dcac5b"
+  source              = "github.com/champ-oss/terraform-aws-metabase.git?ref=v1.0.69-27ec655"
   id                  = local.name
   public_subnet_ids   = data.aws_subnets.public.ids
   private_subnet_ids  = data.aws_subnets.private.ids
   vpc_id              = data.aws_vpcs.this.ids[0]
-  domain              = "${local.name}.${data.aws_route53_zone.this.name}"
+  domain              = local.metabase_host
   certificate_arn     = module.acm.arn
   zone_id             = data.aws_route53_zone.this.zone_id
   protect             = false
   https_egress_only   = false
-  ingress_cidr_blocks = ["10.0.0.0/8"]
+  ingress_cidr_blocks = ["0.0.0.0/0"]
 
   tags = {
     git     = local.git
@@ -74,8 +77,19 @@ module "metabase" {
   }
 }
 
+resource "random_password" "this" {
+  length  = 20
+  special = false
+}
+
 module "this" {
-  source             = "../../"
-  private_subnet_ids = data.aws_subnets.private.ids
-  vpc_id             = data.aws_vpcs.this.ids[0]
+  source              = "../../"
+  private_subnet_ids  = data.aws_subnets.private.ids
+  vpc_id              = data.aws_vpcs.this.ids[0]
+  metabase_card_id    = "1"
+  metabase_url        = local.metabase_url
+  metabase_password   = random_password.this.result
+  metabase_username   = local.metabase_email
+  protect             = false
+  schedule_expression = "cron(0 7 * * ? *)"
 }
