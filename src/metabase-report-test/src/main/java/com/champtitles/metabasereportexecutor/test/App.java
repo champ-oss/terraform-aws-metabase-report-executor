@@ -28,7 +28,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,7 +46,7 @@ public class App {
     private static final int retries = 20;
     private static final int delaySeconds = 5;
     private static final RetryConfig config = new RetryConfigBuilder()
-            .retryOnSpecificExceptions(NoSuchElementException.class)
+            .retryOnAnyException()
             .withMaxNumberOfTries(retries)
             .withDelayBetweenTries(delaySeconds, ChronoUnit.SECONDS)
             .withFixedBackoff()
