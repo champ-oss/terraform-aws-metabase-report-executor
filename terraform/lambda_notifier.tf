@@ -11,5 +11,6 @@ module "lambda_notifier" {
   enable_vpc         = true
   vpc_id             = var.vpc_id
   private_subnet_ids = var.private_subnet_ids
+  timeout            = var.timeout
   environment        = {}
 }

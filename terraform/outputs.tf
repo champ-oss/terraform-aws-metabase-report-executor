@@ -8,6 +8,16 @@ output "aws_region" {
   value       = data.aws_region.this.name
 }
 
+output "bucket" {
+  description = "S3 bucket name"
+  value       = module.s3.bucket
+}
+
+output "executor_function_name" {
+  description = "Lambda function name for executor"
+  value       = module.lambda_executor.function_name
+}
+
 output "private_subnet_ids" {
   description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_subnet_group#subnet_ids"
   value       = var.private_subnet_ids
