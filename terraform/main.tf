@@ -13,3 +13,11 @@ module "hash" {
   source = "github.com/champ-oss/terraform-git-hash.git?ref=v1.0.11-d044d32"
   path   = "${path.module}/.."
 }
+
+resource "random_string" "this" {
+  length  = 5
+  special = false
+  upper   = false
+  lower   = true
+  number  = true
+}

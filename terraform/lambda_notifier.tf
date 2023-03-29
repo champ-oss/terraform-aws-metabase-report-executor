@@ -1,10 +1,10 @@
 module "lambda_notifier" {
   source             = "github.com/champ-oss/terraform-aws-lambda.git?ref=v1.0.114-72d2e3f"
   git                = var.git
-  name               = "notifier"
+  name               = "notifier-${random_string.this.result}"
   sync_image         = true
   sync_source_repo   = "champtitles/metabase-report-notifier"
-  ecr_name           = "${var.git}-notifier"
+  ecr_name           = "${var.git}-notifier-${random_string.this.result}"
   ecr_tag            = module.hash.hash
   tags               = merge(local.tags, var.tags)
   memory_size        = 256

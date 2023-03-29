@@ -14,8 +14,8 @@ variable "metabase_username" {
   type        = string
 }
 
-variable "metabase_password" {
-  description = "Metabase password to use to connect"
+variable "metabase_password_kms" {
+  description = "Metabase password to use to connect (KMS encrypted)"
   sensitive   = true
   type        = string
 }
