@@ -78,6 +78,6 @@ jobs:
             export $key=$value
           done
           cd ../../../ && bash test.sh
-#       - name: destroy
-#         if: always()
-#         run: terraform destroy -auto-approve
+      - name: destroy
+        if: always()
+        run: terraform destroy -auto-approve
