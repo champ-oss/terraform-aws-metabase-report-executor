@@ -108,4 +108,5 @@ module "this" {
   protect               = false
   schedule_expression   = "cron(0 7 * * ? *)"
   tags                  = local.tags
+  kms_key_arn           = module.kms.arn
 }

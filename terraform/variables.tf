@@ -4,6 +4,11 @@ variable "git" {
   default     = "terraform-aws-metabase-report-executor"
 }
 
+variable "kms_key_arn" {
+  description = "ARN of KMS key that was used to encrypt sensitive values (to set IAM permissions)"
+  type        = string
+}
+
 variable "metabase_url" {
   description = "Metabase server URL"
   type        = string
