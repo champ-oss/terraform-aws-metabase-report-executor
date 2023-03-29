@@ -1,5 +1,6 @@
 package com.champtitles.metabasereportexecutor.test;
 
+import com.champtitles.metabasereportexecutor.executor.KmsDecrypt;
 import com.champtitles.metabasereportexecutor.executor.MetabaseClient;
 import com.champtitles.metabasereportexecutor.executor.model.SessionPropertiesResponse;
 import com.evanlennick.retry4j.CallExecutorBuilder;
@@ -38,7 +39,7 @@ public class App {
     private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
     private static final String metabaseUrl = System.getenv("METABASE_URL");
     private static final String metabaseUsername = System.getenv("METABASE_USERNAME");
-    private static final String metabasePassword = System.getenv("METABASE_PASSWORD");
+    private static final String metabasePasswordKms = System.getenv("METABASE_PASSWORD_KMS");
     private static final String awsRegion = System.getenv("AWS_REGION");
     private static final String executorFunctionName = System.getenv("EXECUTOR_FUNCTION_NAME");
     private static final String bucket = System.getenv("BUCKET");
@@ -52,7 +53,8 @@ public class App {
             .build();
 
     public static void main(String[] args) {
-        MetabaseClient metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, metabasePassword);
+        KmsDecrypt kmsDecrypt = new KmsDecrypt(awsRegion);
+        MetabaseClient metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, kmsDecrypt.decrypt(metabasePasswordKms));
 
         SessionPropertiesResponse sessionPropertiesResponse = waitForSessionProperties(metabaseClient);
         assertNotNull(sessionPropertiesResponse);

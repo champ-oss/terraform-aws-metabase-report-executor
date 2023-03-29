@@ -7,6 +7,7 @@ variable "git" {
 variable "kms_key_arn" {
   description = "ARN of KMS key that was used to encrypt sensitive values (to set IAM permissions)"
   type        = string
+  default     = "*"
 }
 
 variable "metabase_url" {

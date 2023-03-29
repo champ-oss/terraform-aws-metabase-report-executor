@@ -23,8 +23,8 @@ output "metabase_username" {
   value       = local.metabase_email
 }
 
-output "metabase_password" {
+output "metabase_password_kms" {
   description = "Metabase password"
   sensitive   = true
-  value       = random_password.this.result
+  value       = aws_kms_ciphertext.this.ciphertext_blob
 }
