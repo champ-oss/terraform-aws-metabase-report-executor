@@ -8,7 +8,6 @@ public class App implements RequestHandler<S3Event, Void> {
 
     @Override
     public Void handleRequest(final S3Event event, final Context context) {
-        System.out.println("hello world");
         System.out.println(event.toString());
         return null;
     }

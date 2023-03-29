@@ -14,3 +14,11 @@ module "lambda_notifier" {
   timeout            = var.timeout
   environment        = {}
 }
+
+resource "aws_lambda_permission" "lambda_notifier" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda_notifier.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.this.arn
+}

@@ -5,3 +5,12 @@ module "s3" {
   protect = var.protect
   tags    = merge(local.tags, var.tags)
 }
+
+resource "aws_s3_bucket_notification" "this" {
+  bucket = module.s3.bucket
+
+  topic {
+    topic_arn = aws_sns_topic.this.arn
+    events    = ["s3:ObjectCreated:*"]
+  }
+}
