@@ -12,6 +12,11 @@ locals {
   metabase_email = "test@example.com"
   metabase_host  = "${local.name}.${data.aws_route53_zone.this.name}"
   metabase_url   = "https://${local.metabase_host}"
+  tags = {
+    git     = local.git
+    cost    = "shared"
+    creator = "terraform"
+  }
 }
 
 data "aws_vpcs" "this" {
@@ -55,6 +60,7 @@ module "acm" {
   create_wildcard   = false
   zone_id           = data.aws_route53_zone.this.zone_id
   enable_validation = true
+  tags              = local.tags
 }
 
 module "kms" {
@@ -63,6 +69,7 @@ module "kms" {
   name                    = "alias/${local.git}-test"
   deletion_window_in_days = 7
   account_actions         = []
+  tags                    = local.tags
 }
 
 module "metabase" {
@@ -77,12 +84,7 @@ module "metabase" {
   protect             = false
   https_egress_only   = false
   ingress_cidr_blocks = ["0.0.0.0/0"]
-
-  tags = {
-    git     = local.git
-    cost    = "metabase"
-    creator = "terraform"
-  }
+  tags                = local.tags
 }
 
 resource "random_password" "this" {
@@ -96,13 +98,14 @@ resource "aws_kms_ciphertext" "this" {
 }
 
 module "this" {
-  source              = "../../"
-  private_subnet_ids  = data.aws_subnets.private.ids
-  vpc_id              = data.aws_vpcs.this.ids[0]
-  metabase_card_id    = "1"
-  metabase_url        = local.metabase_url
-  metabase_password   = aws_kms_ciphertext.this.ciphertext_blob
-  metabase_username   = local.metabase_email
-  protect             = false
-  schedule_expression = "cron(0 7 * * ? *)"
+  source                = "../../"
+  private_subnet_ids    = data.aws_subnets.private.ids
+  vpc_id                = data.aws_vpcs.this.ids[0]
+  metabase_card_id      = "1"
+  metabase_url          = local.metabase_url
+  metabase_password_kms = aws_kms_ciphertext.this.ciphertext_blob
+  metabase_username     = local.metabase_email
+  protect               = false
+  schedule_expression   = "cron(0 7 * * ? *)"
+  tags                  = local.tags
 }
