@@ -8,17 +8,18 @@ import org.slf4j.LoggerFactory;
 public class App implements RequestHandler<Object, Object> {
 
     private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
-
+    private static final String awsRegion = System.getenv("AWS_REGION");
     private static final String bucket = System.getenv("BUCKET");
     private static final String metabaseUrl = System.getenv("METABASE_URL");
     private static final String metabaseUsername = System.getenv("METABASE_USERNAME");
-    private static final String metabasePassword = System.getenv("METABASE_PASSWORD");
+    private static final String metabasePasswordKms = System.getenv("METABASE_PASSWORD_KMS");
     private static final String metabaseCardId = System.getenv("METABASE_CARD_ID");
     private final MetabaseClient metabaseClient;
     private final S3Writer s3Writer;
 
     public App() {
-        metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, metabasePassword);
+        KmsDecrypt kmsDecrypt = new KmsDecrypt(awsRegion);
+        metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, kmsDecrypt.decrypt(metabasePasswordKms));
         s3Writer = new S3Writer(bucket);
     }
 
