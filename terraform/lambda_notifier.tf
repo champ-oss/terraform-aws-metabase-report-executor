@@ -1,7 +1,7 @@
 module "lambda_notifier" {
   source             = "github.com/champ-oss/terraform-aws-lambda.git?ref=v1.0.114-72d2e3f"
   git                = var.git
-  name               = "notifier-${random_string.this.result}"
+  name               = "card-${var.metabase_card_id}-notifier-${random_string.this.result}"
   sync_image         = true
   sync_source_repo   = "champtitles/metabase-report-notifier"
   ecr_name           = "${var.git}-notifier-${random_string.this.result}"
@@ -21,4 +21,9 @@ resource "aws_lambda_permission" "lambda_notifier" {
   function_name = module.lambda_notifier.function_name
   principal     = "sns.amazonaws.com"
   source_arn    = aws_sns_topic.this.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_notifier" {
+  policy_arn = aws_iam_policy.this.arn
+  role       = module.lambda_notifier.role_name
 }

@@ -10,8 +10,9 @@ locals {
 }
 
 module "hash" {
-  source = "github.com/champ-oss/terraform-git-hash.git?ref=v1.0.11-d044d32"
-  path   = "${path.module}/.."
+  source   = "github.com/champ-oss/terraform-git-hash.git?ref=v1.0.11-d044d32"
+  path     = "${path.module}/.."
+  fallback = var.git_hash
 }
 
 resource "random_string" "this" {

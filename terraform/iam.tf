@@ -7,6 +7,17 @@ data "aws_iam_policy_document" "this" {
       "arn:aws:s3:::${module.s3.bucket}/*"
     ]
   }
+
+  statement {
+    actions = [
+      "kms:DescribeKey",
+      "kms:GenerateDataKey",
+      "kms:Decrypt"
+    ]
+    resources = [
+      var.kms_key_arn
+    ]
+  }
 }
 
 resource "aws_iam_policy" "this" {
