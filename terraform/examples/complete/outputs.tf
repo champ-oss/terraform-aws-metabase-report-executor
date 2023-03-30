@@ -13,6 +13,16 @@ output "executor_function_name" {
   value       = module.this.executor_function_name
 }
 
+output "lambda_executor_cloudwatch_log_group" {
+  description = "CloudWatch log group"
+  value       = module.this.lambda_executor_cloudwatch_log_group
+}
+
+output "lambda_notifier_cloudwatch_log_group" {
+  description = "CloudWatch log group"
+  value       = module.this.lambda_notifier_cloudwatch_log_group
+}
+
 output "metabase_url" {
   description = "Metabase url"
   value       = local.metabase_url
