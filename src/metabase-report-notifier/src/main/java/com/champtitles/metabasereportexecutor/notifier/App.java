@@ -23,7 +23,8 @@ public class App implements RequestHandler<S3Event, Void> {
         logger.info(event.toString());
 
         for (S3EventNotification.S3EventNotificationRecord record : event.getRecords()) {
-            s3Reader.downloadXlsx(record.getS3().getObject().getKey());
+            byte[] data = s3Reader.downloadXlsx(record.getS3().getObject().getKey());
+            logger.info("downloaded {} bytes", data.length);
         }
 
         return null;

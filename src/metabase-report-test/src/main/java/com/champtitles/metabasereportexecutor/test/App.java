@@ -45,6 +45,7 @@ public class App {
     private static final String awsRegion = System.getenv("AWS_REGION");
     private static final String executorFunctionName = System.getenv("EXECUTOR_FUNCTION_NAME");
     private static final String lambdaExecutorCloudwatchLogGroup = System.getenv("LAMBDA_EXECUTOR_CLOUDWATCH_LOG_GROUP");
+    private static final String lambdaNotifierCloudwatchLogGroup = System.getenv("LAMBDA_NOTIFIER_CLOUDWATCH_LOG_GROUP");
     private static final String bucket = System.getenv("BUCKET");
     private static final int retries = 90;
     private static final int delaySeconds = 10;
@@ -92,7 +93,13 @@ public class App {
         logger.info("getting executor lambda logs");
         String lambdaExecutorCloudwatchLogStream = getCloudWatchLogStream(lambdaExecutorCloudwatchLogGroup);
         for (String log : getCloudWatchLogs(lambdaExecutorCloudwatchLogStream, lambdaExecutorCloudwatchLogGroup)) {
-            System.out.println(log);
+            logger.info("executor lambda - {}", log);
+        }
+
+        logger.info("getting notifier lambda logs");
+        String lambdaNotifierCloudwatchLogStream = getCloudWatchLogStream(lambdaNotifierCloudwatchLogGroup);
+        for (String log : getCloudWatchLogs(lambdaNotifierCloudwatchLogStream, lambdaNotifierCloudwatchLogGroup)) {
+            logger.info("notifier lambda - {}", log);
         }
     }
 
