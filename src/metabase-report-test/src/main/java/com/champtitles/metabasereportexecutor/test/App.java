@@ -55,7 +55,7 @@ public class App {
             .withFixedBackoff()
             .build();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         KmsDecrypt kmsDecrypt = new KmsDecrypt(awsRegion);
         MetabaseClient metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, kmsDecrypt.decrypt(metabasePasswordKms));
 
@@ -78,11 +78,8 @@ public class App {
         logger.info("invoking executor lambda");
         invokeExecutorLambda();
 
-        logger.info("getting executor lambda logs");
-        String lambdaExecutorCloudwatchLogStream = getCloudWatchLogStream(lambdaExecutorCloudwatchLogGroup);
-        for (String log : getCloudWatchLogs(lambdaExecutorCloudwatchLogStream, lambdaExecutorCloudwatchLogGroup)) {
-            System.out.println(log);
-        }
+        logger.info("waiting 30 seconds for executor to run");
+        Thread.sleep(30 * 1000);
 
         logger.info("checking xlsx files in s3 bucket: {}", bucket);
         List<String> objects = listS3Objects();
@@ -92,6 +89,11 @@ public class App {
             assertTrue(getXlsxRowCount(s3Key) >= 200);
         }
 
+        logger.info("getting executor lambda logs");
+        String lambdaExecutorCloudwatchLogStream = getCloudWatchLogStream(lambdaExecutorCloudwatchLogGroup);
+        for (String log : getCloudWatchLogs(lambdaExecutorCloudwatchLogStream, lambdaExecutorCloudwatchLogGroup)) {
+            System.out.println(log);
+        }
     }
 
     /**
