@@ -7,6 +7,7 @@ import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.DecryptRequest;
 import software.amazon.awssdk.services.kms.model.DecryptResponse;
 
+import java.nio.charset.Charset;
 import java.util.Base64;
 
 public class KmsDecrypt {
@@ -24,7 +25,7 @@ public class KmsDecrypt {
         byte[] decodedBytes = Base64.getDecoder().decode(ciphertextBlob);
         DecryptRequest decryptRequest = DecryptRequest.builder().ciphertextBlob(SdkBytes.fromByteArray(decodedBytes)).build();
         DecryptResponse decryptResponse = kmsClient.decrypt(decryptRequest);
-        return decryptResponse.plaintext().toString();
+        return decryptResponse.plaintext().asString(Charset.defaultCharset());
     }
 
 }
