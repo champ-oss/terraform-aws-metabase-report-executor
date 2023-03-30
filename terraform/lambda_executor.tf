@@ -1,7 +1,7 @@
 module "lambda_executor" {
   source              = "github.com/champ-oss/terraform-aws-lambda.git?ref=v1.0.114-72d2e3f"
   git                 = var.git
-  name                = "executor-${random_string.this.result}"
+  name                = "card-${var.metabase_card_id}-executor-${random_string.this.result}"
   sync_image          = true
   sync_source_repo    = "champtitles/metabase-report-executor"
   ecr_name            = "${var.git}-executor-${random_string.this.result}"
