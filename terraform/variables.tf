@@ -10,6 +10,12 @@ variable "git_hash" {
   default     = "latest"
 }
 
+variable "enabled" {
+  description = "Enable the schedule"
+  type        = bool
+  default     = true
+}
+
 variable "kms_key_arn" {
   description = "ARN of KMS key that was used to encrypt sensitive values (to set IAM permissions)"
   type        = string

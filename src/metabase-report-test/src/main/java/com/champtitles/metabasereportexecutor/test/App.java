@@ -93,13 +93,13 @@ public class App {
         logger.info("getting executor lambda logs");
         String lambdaExecutorCloudwatchLogStream = getCloudWatchLogStream(lambdaExecutorCloudwatchLogGroup);
         for (String log : getCloudWatchLogs(lambdaExecutorCloudwatchLogStream, lambdaExecutorCloudwatchLogGroup)) {
-            logger.info("executor lambda - {}", log);
+            System.out.println("executor lambda - " + log);
         }
 
         logger.info("getting notifier lambda logs");
         String lambdaNotifierCloudwatchLogStream = getCloudWatchLogStream(lambdaNotifierCloudwatchLogGroup);
         for (String log : getCloudWatchLogs(lambdaNotifierCloudwatchLogStream, lambdaNotifierCloudwatchLogGroup)) {
-            logger.info("notifier lambda - {}", log);
+            System.out.println("notifier lambda - " + log);
         }
     }
 

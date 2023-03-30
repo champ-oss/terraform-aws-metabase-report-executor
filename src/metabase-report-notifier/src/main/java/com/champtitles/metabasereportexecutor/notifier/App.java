@@ -7,7 +7,7 @@ import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotificatio
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class App implements RequestHandler<S3Event, Void> {
+public class App implements RequestHandler<S3Event, String> {
 
     private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
     private static final String bucket = System.getenv("BUCKET");
@@ -19,11 +19,11 @@ public class App implements RequestHandler<S3Event, Void> {
     }
 
     @Override
-    public Void handleRequest(final S3Event event, final Context context) {
+    public String handleRequest(S3Event event, Context context) {
         logger.info(event.toString());
 
         for (S3EventNotification.S3EventNotificationRecord record : event.getRecords()) {
-            byte[] data = s3Reader.downloadXlsx(record.getS3().getObject().getKey());
+            byte[] data = s3Reader.downloadXlsx(record.getS3().getObject().getUrlDecodedKey());
             logger.info("downloaded {} bytes", data.length);
         }
 
