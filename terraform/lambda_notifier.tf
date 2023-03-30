@@ -12,7 +12,9 @@ module "lambda_notifier" {
   vpc_id             = var.vpc_id
   private_subnet_ids = var.private_subnet_ids
   timeout            = var.timeout
-  environment        = {}
+  environment = {
+    BUCKET = module.s3.bucket
+  }
 }
 
 resource "aws_lambda_permission" "lambda_notifier" {
