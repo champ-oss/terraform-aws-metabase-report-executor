@@ -122,7 +122,7 @@ module "this" {
   kms_key_arn           = module.kms.arn
   recipients            = ["success@simulator.amazonses.com"]
   from_address          = "metabase-report@champtitles.com"
-  smtp_host             = "email-smtp.us-east-2.amazonaws.com"
+  smtp_host             = "email-smtp.us-east-1.amazonaws.com"
   smtp_port             = "587"
   smtp_user             = module.ses_smtp_users.smtp_username
   smtp_password_kms     = aws_kms_ciphertext.smtp_password.ciphertext_blob
