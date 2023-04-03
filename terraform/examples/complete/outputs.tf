@@ -36,5 +36,5 @@ output "metabase_username" {
 output "metabase_password_kms" {
   description = "Metabase password"
   sensitive   = true
-  value       = aws_kms_ciphertext.this.ciphertext_blob
+  value       = aws_kms_ciphertext.metabase_password.ciphertext_blob
 }
