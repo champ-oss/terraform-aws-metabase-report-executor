@@ -42,6 +42,7 @@ public class App {
     private static final String metabaseUrl = System.getenv("METABASE_URL");
     private static final String metabaseUsername = System.getenv("METABASE_USERNAME");
     private static final String metabasePasswordKms = System.getenv("METABASE_PASSWORD_KMS");
+    private static final String metabaseDeviceUuid = System.getenv("METABASE_DEVICE_UUID");
     private static final String awsRegion = System.getenv("AWS_REGION");
     private static final String executorFunctionName = System.getenv("EXECUTOR_FUNCTION_NAME");
     private static final String lambdaExecutorCloudwatchLogGroup = System.getenv("LAMBDA_EXECUTOR_CLOUDWATCH_LOG_GROUP");
@@ -57,7 +58,7 @@ public class App {
 
     public static void main(String[] args) throws InterruptedException {
         KmsDecrypt kmsDecrypt = new KmsDecrypt(awsRegion);
-        MetabaseClient metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, kmsDecrypt.decrypt(metabasePasswordKms));
+        MetabaseClient metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, kmsDecrypt.decrypt(metabasePasswordKms), metabaseDeviceUuid);
 
         SessionPropertiesResponse sessionPropertiesResponse = waitForSessionProperties(metabaseClient);
         assertNotNull(sessionPropertiesResponse);

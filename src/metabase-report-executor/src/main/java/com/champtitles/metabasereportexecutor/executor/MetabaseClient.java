@@ -22,23 +22,20 @@ public class MetabaseClient {
     private final String baseUrl;
     private final String email;
     private final String password;
+    private final String deviceUuid;
     private final HttpClient httpClient;
     private String sessionId;
 
     /**
      * Create a MetabaseClient
      *
-     * @param baseUrl  URL of the Metabase server
-     * @param email    login email
-     * @param password login password
+     * @param baseUrl    URL of the Metabase server
+     * @param email      login email
+     * @param password   login password
+     * @param deviceUuid cookie to set on each request
      */
-    public MetabaseClient(String baseUrl, String email, String password) {
-        this.baseUrl = baseUrl;
-        this.email = email;
-        this.password = password;
-
-        System.setProperty("jdk.httpclient.keepalive.timeout", "5");
-        httpClient = HttpClient.newBuilder().version(HTTP_1_1).build();
+    public MetabaseClient(String baseUrl, String email, String password, String deviceUuid) {
+        this(baseUrl, email, password, deviceUuid, HttpClient.newBuilder().version(HTTP_1_1).build());
     }
 
     /**
@@ -47,12 +44,14 @@ public class MetabaseClient {
      * @param baseUrl    URL of the Metabase server
      * @param email      login email
      * @param password   login password
+     * @param deviceUuid cookie to set on each request
      * @param httpClient inject a HttpClient
      */
-    MetabaseClient(String baseUrl, String email, String password, HttpClient httpClient) {
+    MetabaseClient(String baseUrl, String email, String password, String deviceUuid, HttpClient httpClient) {
         this.baseUrl = baseUrl;
         this.email = email;
         this.password = password;
+        this.deviceUuid = deviceUuid;
         this.httpClient = httpClient;
     }
 
@@ -94,6 +93,7 @@ public class MetabaseClient {
                 .newBuilder()
                 .uri(createUri("/api/setup"))
                 .header("Content-Type", "application/json")
+                .header("Cookie", "metabase.DEVICE=" + deviceUuid)
                 .POST(createBody(setupRequest))
                 .build();
         String response = sendHttpRequestGetString(httpRequest, 200);
@@ -114,6 +114,7 @@ public class MetabaseClient {
                 .newBuilder()
                 .uri(createUri("/api/session"))
                 .header("Content-Type", "application/json")
+                .header("Cookie", "metabase.DEVICE=" + deviceUuid)
                 .POST(createBody(sessionRequest))
                 .build();
         String response = sendHttpRequestGetString(httpRequest, 200);
@@ -151,6 +152,7 @@ public class MetabaseClient {
                 .newBuilder()
                 .uri(createUri("/api/card"))
                 .header("Content-Type", "application/json")
+                .header("Cookie", "metabase.DEVICE=" + deviceUuid)
                 .header("X-Metabase-Session", sessionId)
                 .POST(createBody(createCardRequest))
                 .build();
@@ -184,6 +186,7 @@ public class MetabaseClient {
                 .newBuilder()
                 .uri(createUri("/api/card/" + cardId + "/query/xlsx"))
                 .header("X-Metabase-Session", sessionId)
+                .header("Cookie", "metabase.DEVICE=" + deviceUuid)
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build();
         byte[] response = sendHttpRequestGetBytes(httpRequest, 200);

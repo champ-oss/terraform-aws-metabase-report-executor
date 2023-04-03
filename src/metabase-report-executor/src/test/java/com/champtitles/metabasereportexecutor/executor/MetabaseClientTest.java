@@ -35,7 +35,7 @@ class MetabaseClientTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        metabaseClient = new MetabaseClient("http://localhost:12345", "test@example.com", "test123", httpClient);
+        metabaseClient = new MetabaseClient("http://localhost:12345", "test@example.com", "test123", "abc123", httpClient);
     }
 
     @Test
@@ -88,6 +88,7 @@ class MetabaseClientTest {
                 .newBuilder()
                 .uri(new URI("http://localhost:12345/api/setup"))
                 .header("Content-Type", "application/json")
+                .header("Cookie", "metabase.DEVICE=abc123")
                 .POST(HttpRequest.BodyPublishers.ofString("""
                         {
                           "token": "abc123",
@@ -124,6 +125,7 @@ class MetabaseClientTest {
                 .newBuilder()
                 .uri(new URI("http://localhost:12345/api/session"))
                 .header("Content-Type", "application/json")
+                .header("Cookie", "metabase.DEVICE=abc123")
                 .POST(HttpRequest.BodyPublishers.ofString("""
                         {
                           "username": "test@example.com",
@@ -211,6 +213,7 @@ class MetabaseClientTest {
                 .newBuilder()
                 .uri(new URI("http://localhost:12345/api/card/1/query/xlsx"))
                 .header("X-Metabase-Session", "abc123")
+                .header("Cookie", "metabase.DEVICE=abc123")
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build();
         Mockito.verify(this.httpClient, Mockito.times(1)).send(Mockito.eq(expectedHttpRequest), eq(HttpResponse.BodyHandlers.ofByteArray()));
