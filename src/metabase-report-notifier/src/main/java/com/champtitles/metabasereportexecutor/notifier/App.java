@@ -2,12 +2,11 @@ package com.champtitles.metabasereportexecutor.notifier;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.events.S3Event;
-import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
+import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class App implements RequestHandler<S3Event, String> {
+public class App implements RequestHandler<SNSEvent, String> {
 
     private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
     private static final String bucket = System.getenv("BUCKET");
@@ -19,13 +18,13 @@ public class App implements RequestHandler<S3Event, String> {
     }
 
     @Override
-    public String handleRequest(S3Event event, Context context) {
-        logger.info(event.toString());
+    public String handleRequest(SNSEvent snsEvent, Context context) {
+        logger.info(snsEvent.toString());
 
-        for (S3EventNotification.S3EventNotificationRecord record : event.getRecords()) {
-            byte[] data = s3Reader.downloadXlsx(record.getS3().getObject().getUrlDecodedKey());
-            logger.info("downloaded {} bytes", data.length);
-        }
+//        for (S3EventNotification.S3EventNotificationRecord record : event.getRecords()) {
+//            byte[] data = s3Reader.downloadXlsx(record.getS3().getObject().getUrlDecodedKey());
+//            logger.info("downloaded {} bytes", data.length);
+//        }
 
         return null;
     }

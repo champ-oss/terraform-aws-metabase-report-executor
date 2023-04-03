@@ -15,6 +15,7 @@ data "aws_iam_policy_document" "sns" {
 }
 
 resource "aws_sns_topic_subscription" "this" {
+  count     = var.enable_email ? 1 : 0
   topic_arn = aws_sns_topic.this.arn
   protocol  = "lambda"
   endpoint  = module.lambda_notifier.arn

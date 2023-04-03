@@ -10,7 +10,13 @@ variable "git_hash" {
   default     = "latest"
 }
 
-variable "enabled" {
+variable "enable_email" {
+  description = "Enable sending the email"
+  type        = bool
+  default     = true
+}
+
+variable "enable_schedule" {
   description = "Enable the schedule"
   type        = bool
   default     = true
