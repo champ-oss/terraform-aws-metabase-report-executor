@@ -14,12 +14,13 @@ public class App implements RequestHandler<Object, Object> {
     private static final String metabaseUsername = System.getenv("METABASE_USERNAME");
     private static final String metabasePasswordKms = System.getenv("METABASE_PASSWORD_KMS");
     private static final String metabaseCardId = System.getenv("METABASE_CARD_ID");
+    private static final String metabaseDeviceUuid = System.getenv("METABASE_DEVICE_UUID");
     private final MetabaseClient metabaseClient;
     private final S3Writer s3Writer;
 
     public App() {
         KmsDecrypt kmsDecrypt = new KmsDecrypt(awsRegion);
-        metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, kmsDecrypt.decrypt(metabasePasswordKms));
+        metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, kmsDecrypt.decrypt(metabasePasswordKms), metabaseDeviceUuid);
         s3Writer = new S3Writer(bucket);
     }
 
