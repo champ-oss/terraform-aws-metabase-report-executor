@@ -13,7 +13,13 @@ module "lambda_notifier" {
   private_subnet_ids = var.private_subnet_ids
   timeout            = var.timeout
   environment = {
-    BUCKET = module.s3.bucket
+    BUCKET            = module.s3.bucket
+    SMTP_HOST         = var.smtp_host
+    SMTP_PORT         = var.smtp_port
+    SMTP_USER         = var.smtp_user
+    SMTP_PASSWORD_KMS = var.smtp_password_kms
+    FROM_ADDRESS      = var.from_address
+    RECIPIENTS        = join(",", var.recipients)
   }
 }
 

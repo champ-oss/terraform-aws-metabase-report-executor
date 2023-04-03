@@ -22,6 +22,12 @@ variable "enable_schedule" {
   default     = true
 }
 
+variable "from_address" {
+  description = "Email address to use as sender"
+  type        = string
+  default     = null
+}
+
 variable "kms_key_arn" {
   description = "ARN of KMS key that was used to encrypt sensitive values (to set IAM permissions)"
   type        = string
@@ -60,10 +66,42 @@ variable "protect" {
   default     = true
 }
 
+variable "recipients" {
+  description = "List of email address recipients"
+  type        = list(string)
+  default     = []
+}
+
 variable "schedule_expression" {
   description = "schedule expression using cron"
   type        = string
   default     = "cron(0 7 * * ? *)"
+}
+
+variable "smtp_host" {
+  description = "SMTP server hostname"
+  type        = string
+  default     = null
+}
+
+variable "smtp_port" {
+  description = "SMTP server port"
+  type        = string
+  default     = null
+}
+
+variable "smtp_user" {
+  description = "SMTP username"
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "smtp_password_kms" {
+  description = "SMTP password (KMS encrypted)"
+  type        = string
+  sensitive   = true
+  default     = null
 }
 
 variable "tags" {

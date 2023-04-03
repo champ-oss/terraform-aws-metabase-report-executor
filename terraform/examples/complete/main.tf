@@ -98,9 +98,14 @@ resource "random_password" "this" {
   special = false
 }
 
-resource "aws_kms_ciphertext" "this" {
+resource "aws_kms_ciphertext" "metabase_password" {
   key_id    = module.kms.key_id
   plaintext = random_password.this.result
+}
+
+resource "aws_kms_ciphertext" "smtp_password" {
+  key_id    = module.kms.key_id
+  plaintext = module.ses_smtp_users.smtp_password
 }
 
 module "this" {
@@ -109,10 +114,16 @@ module "this" {
   vpc_id                = data.aws_vpcs.this.ids[0]
   metabase_card_id      = "1"
   metabase_url          = local.metabase_url
-  metabase_password_kms = aws_kms_ciphertext.this.ciphertext_blob
+  metabase_password_kms = aws_kms_ciphertext.metabase_password.ciphertext_blob
   metabase_username     = local.metabase_email
   protect               = false
   schedule_expression   = "cron(0 7 * * ? *)"
   tags                  = local.tags
   kms_key_arn           = module.kms.arn
+  recipients            = ["success@simulator.amazonses.com"]
+  from_address          = "metabase-report@champtitles.com"
+  smtp_host             = "email-smtp.us-east-2.amazonaws.com"
+  smtp_port             = "587"
+  smtp_user             = module.ses_smtp_users.smtp_username
+  smtp_password_kms     = aws_kms_ciphertext.smtp_password.ciphertext_blob
 }
