@@ -4,6 +4,18 @@ variable "git" {
   default     = "terraform-aws-metabase-report-executor"
 }
 
+variable "git_hash" {
+  description = "Which hash of the git code to deploy"
+  type        = string
+  default     = "latest"
+}
+
+variable "kms_key_arn" {
+  description = "ARN of KMS key that was used to encrypt sensitive values (to set IAM permissions)"
+  type        = string
+  default     = "*"
+}
+
 variable "metabase_url" {
   description = "Metabase server URL"
   type        = string
@@ -14,8 +26,9 @@ variable "metabase_username" {
   type        = string
 }
 
-variable "metabase_password" {
-  description = "Metabase password to use to connect"
+variable "metabase_password_kms" {
+  description = "Metabase password to use to connect (KMS encrypted)"
+  sensitive   = true
   type        = string
 }
 

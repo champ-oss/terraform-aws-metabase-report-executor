@@ -13,9 +13,24 @@ output "bucket" {
   value       = module.s3.bucket
 }
 
+output "lambda_executor_cloudwatch_log_group" {
+  description = "CloudWatch log group"
+  value       = module.lambda_executor.cloudwatch_log_group
+}
+
+output "lambda_notifier_cloudwatch_log_group" {
+  description = "CloudWatch log group"
+  value       = module.lambda_notifier.cloudwatch_log_group
+}
+
 output "executor_function_name" {
   description = "Lambda function name for executor"
   value       = module.lambda_executor.function_name
+}
+
+output "metabase_device_uuid" {
+  description = "Used as a cookie for metabase requests"
+  value       = random_uuid.this.result
 }
 
 output "private_subnet_ids" {

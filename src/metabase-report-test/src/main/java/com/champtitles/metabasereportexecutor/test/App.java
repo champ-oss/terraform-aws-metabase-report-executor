@@ -1,5 +1,6 @@
 package com.champtitles.metabasereportexecutor.test;
 
+import com.champtitles.metabasereportexecutor.executor.KmsDecrypt;
 import com.champtitles.metabasereportexecutor.executor.MetabaseClient;
 import com.champtitles.metabasereportexecutor.executor.model.SessionPropertiesResponse;
 import com.evanlennick.retry4j.CallExecutorBuilder;
@@ -17,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
+import software.amazon.awssdk.services.cloudwatchlogs.model.*;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 import software.amazon.awssdk.services.lambda.model.InvokeRequest;
 import software.amazon.awssdk.services.lambda.model.InvokeResponse;
@@ -38,11 +41,13 @@ public class App {
     private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
     private static final String metabaseUrl = System.getenv("METABASE_URL");
     private static final String metabaseUsername = System.getenv("METABASE_USERNAME");
-    private static final String metabasePassword = System.getenv("METABASE_PASSWORD");
+    private static final String metabasePasswordKms = System.getenv("METABASE_PASSWORD_KMS");
+    private static final String metabaseDeviceUuid = System.getenv("METABASE_DEVICE_UUID");
     private static final String awsRegion = System.getenv("AWS_REGION");
     private static final String executorFunctionName = System.getenv("EXECUTOR_FUNCTION_NAME");
+    private static final String lambdaExecutorCloudwatchLogGroup = System.getenv("LAMBDA_EXECUTOR_CLOUDWATCH_LOG_GROUP");
     private static final String bucket = System.getenv("BUCKET");
-    private static final int retries = 60;
+    private static final int retries = 90;
     private static final int delaySeconds = 10;
     private static final RetryConfig config = new RetryConfigBuilder()
             .retryOnAnyException()
@@ -51,8 +56,9 @@ public class App {
             .withFixedBackoff()
             .build();
 
-    public static void main(String[] args) {
-        MetabaseClient metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, metabasePassword);
+    public static void main(String[] args) throws InterruptedException {
+        KmsDecrypt kmsDecrypt = new KmsDecrypt(awsRegion);
+        MetabaseClient metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, kmsDecrypt.decrypt(metabasePasswordKms), metabaseDeviceUuid);
 
         SessionPropertiesResponse sessionPropertiesResponse = waitForSessionProperties(metabaseClient);
         assertNotNull(sessionPropertiesResponse);
@@ -73,6 +79,9 @@ public class App {
         logger.info("invoking executor lambda");
         invokeExecutorLambda();
 
+        logger.info("waiting 30 seconds for executor to run");
+        Thread.sleep(30 * 1000);
+
         logger.info("checking xlsx files in s3 bucket: {}", bucket);
         List<String> objects = listS3Objects();
         assertTrue(objects.size() > 0);
@@ -81,6 +90,11 @@ public class App {
             assertTrue(getXlsxRowCount(s3Key) >= 200);
         }
 
+        logger.info("getting executor lambda logs");
+        String lambdaExecutorCloudwatchLogStream = getCloudWatchLogStream(lambdaExecutorCloudwatchLogGroup);
+        for (String log : getCloudWatchLogs(lambdaExecutorCloudwatchLogStream, lambdaExecutorCloudwatchLogGroup)) {
+            System.out.println(log);
+        }
     }
 
     /**
@@ -152,5 +166,53 @@ public class App {
             logger.error("unable to open xlsx file: {}", s3Key);
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Get the latest log stream from the CloudWatch log group
+     *
+     * @param logGroupName CloudWatch log group
+     * @return name of the latest log stream
+     */
+    private static String getCloudWatchLogStream(String logGroupName) {
+        CloudWatchLogsClient cloudWatchLogsClient = CloudWatchLogsClient
+                .builder()
+                .region(Region.of(awsRegion))
+                .credentialsProvider(DefaultCredentialsProvider.create())
+                .build();
+
+        DescribeLogStreamsRequest describeLogStreamsRequest = DescribeLogStreamsRequest
+                .builder()
+                .logGroupName(logGroupName)
+                .orderBy("LastEventTime")
+                .descending(true)
+                .build();
+
+        DescribeLogStreamsResponse describeLogStreamsResponse = cloudWatchLogsClient.describeLogStreams(describeLogStreamsRequest);
+        return describeLogStreamsResponse.logStreams().get(0).logStreamName();
+    }
+
+    /**
+     * Get log messages from the specified CloudWatch log stream
+     *
+     * @param logStreamName name of the log stream to query
+     * @param logGroupName  CloudWatch log group
+     * @return array of log messages
+     */
+    private static String[] getCloudWatchLogs(String logStreamName, String logGroupName) {
+        CloudWatchLogsClient cloudWatchLogsClient = CloudWatchLogsClient
+                .builder()
+                .region(Region.of(awsRegion))
+                .credentialsProvider(DefaultCredentialsProvider.create())
+                .build();
+
+        GetLogEventsRequest getLogEventsRequest = GetLogEventsRequest
+                .builder()
+                .logGroupName(logGroupName)
+                .logStreamName(logStreamName)
+                .build();
+
+        GetLogEventsResponse getLogEventsResponse = cloudWatchLogsClient.getLogEvents(getLogEventsRequest);
+        return getLogEventsResponse.events().stream().map(OutputLogEvent::message).toArray(String[]::new);
     }
 }

@@ -30,7 +30,7 @@ defaults:
     working-directory: terraform/examples/complete
 
 jobs:
-  terraform:
+  test:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
