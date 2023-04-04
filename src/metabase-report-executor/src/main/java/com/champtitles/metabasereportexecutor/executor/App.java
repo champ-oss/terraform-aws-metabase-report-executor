@@ -31,6 +31,8 @@ public class App implements RequestHandler<Object, Object> {
         logger.info("running query for card: {}", metabaseCardId);
         byte[] xlsxBody = metabaseClient.queryCardGetXlsx(metabaseCardId);
         s3Writer.uploadXlsx(xlsxBody, "card" + metabaseCardId);
+
+        logger.info("done processing card: {}", metabaseCardId);
         return null;
     }
 

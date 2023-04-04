@@ -37,14 +37,11 @@ public class App implements RequestHandler<SNSEvent, Void> {
 
     @Override
     public Void handleRequest(SNSEvent snsEvent, Context context) {
-        logger.info(snsEvent.toString());
 
         for (SNSEvent.SNSRecord snsRecord : snsEvent.getRecords()) {
             String s3Key = parseS3Key(snsRecord.getSNS().getMessage());
             byte[] data = s3Reader.downloadXlsx(s3Key);
             logger.info("downloaded {} bytes", data.length);
-
-            logger.info("sending email");
             emailSender.sendEmail("metabase report", recipients.split(","), getS3FileName(s3Key), data);
         }
 

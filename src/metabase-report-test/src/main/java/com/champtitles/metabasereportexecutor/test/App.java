@@ -91,16 +91,26 @@ public class App {
         }
 
         logger.info("getting executor lambda logs");
+        boolean executorSuccess = false;
         String lambdaExecutorCloudwatchLogStream = getCloudWatchLogStream(lambdaExecutorCloudwatchLogGroup);
         for (String log : getCloudWatchLogs(lambdaExecutorCloudwatchLogStream, lambdaExecutorCloudwatchLogGroup)) {
             System.out.println("executor lambda - " + log);
+            if (log.contains("done processing")) {
+                executorSuccess = true;
+            }
         }
+        assertTrue(executorSuccess);
 
         logger.info("getting notifier lambda logs");
+        boolean notifierSuccess = false;
         String lambdaNotifierCloudwatchLogStream = getCloudWatchLogStream(lambdaNotifierCloudwatchLogGroup);
         for (String log : getCloudWatchLogs(lambdaNotifierCloudwatchLogStream, lambdaNotifierCloudwatchLogGroup)) {
             System.out.println("notifier lambda - " + log);
+            if (log.contains("address is not verified")) {
+                notifierSuccess = true;
+            }
         }
+        assertTrue(notifierSuccess);
     }
 
     /**
