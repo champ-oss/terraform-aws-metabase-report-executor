@@ -42,6 +42,9 @@ public class App implements RequestHandler<SNSEvent, Void> {
             String s3Key = parseS3Key(snsRecord.getSNS().getMessage());
             byte[] data = s3Reader.downloadXlsx(s3Key);
             logger.info("downloaded {} bytes", data.length);
+            if (data.length <= 0) {
+                return null;
+            }
             emailSender.sendEmail("metabase report", recipients.split(","), getS3FileName(s3Key), data);
         }
 

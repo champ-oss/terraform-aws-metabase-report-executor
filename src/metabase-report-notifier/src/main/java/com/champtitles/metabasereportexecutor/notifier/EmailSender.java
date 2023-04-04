@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -133,15 +134,42 @@ public class EmailSender {
      */
     private static void setAttachment(Message message, String fileName, byte[] xlsxData) {
         logger.info("creating email attachment for file: {}", fileName);
-        MimeBodyPart mimeBodyPart = new MimeBodyPart();
-        ByteArrayDataSource byteArrayDataSource = new ByteArrayDataSource(xlsxData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        Multipart multipart = new MimeMultipart();
 
         try {
-            mimeBodyPart.setDataHandler(new DataHandler(byteArrayDataSource));
-            mimeBodyPart.setFileName(fileName);
-            multipart.addBodyPart(mimeBodyPart);
-            message.setContent(multipart);
+            // Create a multipart/alternative child container.
+            MimeMultipart msgBody = new MimeMultipart("alternative");
+
+            // Create a wrapper for the HTML and text parts.
+            MimeBodyPart wrap = new MimeBodyPart();
+
+            // Define the HTML part.
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent("<html></html>", "text/html; charset=UTF-8");
+
+            // Add the HTML parts to the child container.
+            // msgBody.addBodyPart(textPart);
+            msgBody.addBodyPart(htmlPart);
+
+            // Add the child container to the wrapper object.
+            wrap.setContent(msgBody);
+
+            // Create a multipart/mixed parent container.
+            MimeMultipart msg = new MimeMultipart("mixed");
+
+            // Add the parent container to the message.
+            message.setContent(msg);
+
+            // Add the multipart/alternative part to the message.
+            msg.addBodyPart(wrap);
+
+            // Define the attachment.
+            MimeBodyPart att = new MimeBodyPart();
+            DataSource fds = new ByteArrayDataSource(xlsxData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            att.setDataHandler(new DataHandler(fds));
+            att.setFileName(fileName);
+
+            // Add the attachment to the message.
+            msg.addBodyPart(att);
 
         } catch (MessagingException e) {
             logger.error("failed to create email attachment from file: {}", fileName);
