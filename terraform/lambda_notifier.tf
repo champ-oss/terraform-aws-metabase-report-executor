@@ -20,6 +20,8 @@ module "lambda_notifier" {
     SMTP_PASSWORD_KMS = var.smtp_password_kms
     FROM_ADDRESS      = var.from_address
     RECIPIENTS        = join(",", var.recipients)
+    METABASE_CARD_ID  = var.metabase_card_id
+    NAME              = var.name
   }
 }
 

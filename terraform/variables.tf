@@ -55,6 +55,11 @@ variable "metabase_card_id" {
   type        = string
 }
 
+variable "name" {
+  description = "name of the report"
+  type        = string
+}
+
 variable "private_subnet_ids" {
   description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_subnet_group#subnet_ids"
   type        = list(string)

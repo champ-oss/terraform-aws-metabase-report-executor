@@ -120,6 +120,7 @@ module "this" {
   schedule_expression   = "cron(0 7 * * ? *)"
   tags                  = local.tags
   kms_key_arn           = module.kms.arn
+  name                  = "Test Report"
   recipients            = ["success@simulator.amazonses.com"]
   from_address          = "metabase-report@champtitles.com"
   smtp_host             = "email-smtp.us-east-2.amazonaws.com"

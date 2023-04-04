@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
 
 public class App implements RequestHandler<SNSEvent, Void> {
@@ -24,6 +26,8 @@ public class App implements RequestHandler<SNSEvent, Void> {
     private static final String smtpPasswordKms = System.getenv("SMTP_PASSWORD_KMS");
     private static final String fromAddress = System.getenv("FROM_ADDRESS");
     private static final String recipients = System.getenv("RECIPIENTS");
+    private static final String metabaseCardId = System.getenv("METABASE_CARD_ID");
+    private static final String name = System.getenv("NAME");
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final JsonPointer objectKeyPtr = JsonPointer.compile("/Records/0/s3/object/key");
     private final S3Reader s3Reader;
@@ -45,7 +49,7 @@ public class App implements RequestHandler<SNSEvent, Void> {
             if (data.length <= 0) {
                 return null;
             }
-            emailSender.sendEmail("metabase report", recipients.split(","), getS3FileName(s3Key), data);
+            emailSender.sendEmail(createSubject(metabaseCardId, name), recipients.split(","), getS3FileName(s3Key), data);
         }
 
         return null;
@@ -78,5 +82,19 @@ public class App implements RequestHandler<SNSEvent, Void> {
     static String getS3FileName(String s3Key) {
         String[] parts = s3Key.split("/");
         return parts[parts.length - 1];
+    }
+
+    /**
+     * Create an email subject line with the month and year included
+     *
+     * @param cardId id of the metabase card
+     * @param name   name for the report
+     * @return formatted subject line
+     */
+    static String createSubject(String cardId, String name) {
+        LocalDateTime now = LocalDateTime.now();
+        String month = now.format(DateTimeFormatter.ofPattern("MM"));
+        String year = now.format(DateTimeFormatter.ofPattern("yyyy"));
+        return cardId + ": " + name + " For " + month + " " + year;
     }
 }
