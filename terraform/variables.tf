@@ -19,7 +19,7 @@ variable "git_hash" {
 variable "enable_alarms" {
   description = "Enable the CloudWatch metric alarms for failures"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "enable_email" {
