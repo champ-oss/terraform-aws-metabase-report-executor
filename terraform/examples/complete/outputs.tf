@@ -23,6 +23,11 @@ output "lambda_notifier_cloudwatch_log_group" {
   value       = module.this.lambda_notifier_cloudwatch_log_group
 }
 
+output "metabase_device_uuid" {
+  description = "Used as a cookie for metabase requests"
+  value       = module.this.metabase_device_uuid
+}
+
 output "metabase_url" {
   description = "Metabase url"
   value       = local.metabase_url
