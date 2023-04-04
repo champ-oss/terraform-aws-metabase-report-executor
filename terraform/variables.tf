@@ -25,7 +25,7 @@ variable "enable_schedule" {
 variable "from_address" {
   description = "Email address to use as sender"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "kms_key_arn" {
@@ -81,27 +81,27 @@ variable "schedule_expression" {
 variable "smtp_host" {
   description = "SMTP server hostname"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "smtp_port" {
   description = "SMTP server port"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "smtp_user" {
   description = "SMTP username"
   type        = string
   sensitive   = true
-  default     = null
+  default     = ""
 }
 
 variable "smtp_password_kms" {
   description = "SMTP password (KMS encrypted)"
   type        = string
   sensitive   = true
-  default     = null
+  default     = ""
 }
 
 variable "tags" {

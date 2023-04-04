@@ -20,5 +20,5 @@ resource "random_string" "this" {
   special = false
   upper   = false
   lower   = true
-  number  = true
+  numeric = true
 }
