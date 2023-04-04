@@ -25,19 +25,22 @@ public class App implements RequestHandler<SNSEvent, Void> {
     private static final String smtpUser = System.getenv("SMTP_USER");
     private static final String smtpPasswordKms = System.getenv("SMTP_PASSWORD_KMS");
     private static final String fromAddress = System.getenv("FROM_ADDRESS");
-    private static final String recipients = System.getenv("RECIPIENTS");
-    private static final String metabaseCardId = System.getenv("METABASE_CARD_ID");
-    private static final String name = System.getenv("NAME");
-    private static final String sizeLimitBytes = System.getenv("SIZE_LIMIT_BYTES");
+    private static final String recipients = System.getenv().getOrDefault("RECIPIENTS", "test@example.com");
+    private static final String metabaseCardId = System.getenv().getOrDefault("METABASE_CARD_ID", "1");
+    private static final String name = System.getenv().getOrDefault("NAME", "Test");
+    private static final String sizeLimitBytes = System.getenv().getOrDefault("SIZE_LIMIT_BYTES", "26214400");
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final JsonPointer objectKeyPtr = JsonPointer.compile("/Records/0/s3/object/key");
     private final S3Reader s3Reader;
     private final EmailSender emailSender;
 
     public App() {
-        KmsDecrypt kmsDecrypt = new KmsDecrypt(awsRegion);
-        s3Reader = new S3Reader(bucket);
-        emailSender = new EmailSender(smtpHost, smtpPort, smtpUser, kmsDecrypt.decrypt(smtpPasswordKms), fromAddress);
+        this(new S3Reader(bucket), new EmailSender(smtpHost, smtpPort, smtpUser, new KmsDecrypt((awsRegion)).decrypt(smtpPasswordKms), fromAddress));
+    }
+
+    App(S3Reader s3Reader, EmailSender emailSender) {
+        this.s3Reader = s3Reader;
+        this.emailSender = emailSender;
     }
 
     @Override

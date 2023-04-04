@@ -1,3 +1,4 @@
+# Used to trigger the notifier lambda when files are created
 resource "aws_sns_topic" "this" {
   name_prefix = "${var.git}-s3-card-${var.metabase_card_id}-"
   policy      = data.aws_iam_policy_document.sns.json
@@ -21,6 +22,7 @@ resource "aws_sns_topic_subscription" "this" {
   endpoint  = module.lambda_notifier.arn
 }
 
+# Used for CloudWatch alarms (ex: lambda errors)
 resource "aws_sns_topic" "alarms" {
   name_prefix = "${var.git}-card-${var.metabase_card_id}-alarms-"
 }
