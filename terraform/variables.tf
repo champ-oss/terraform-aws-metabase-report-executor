@@ -1,3 +1,9 @@
+variable "alarms_email" {
+  description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription#endpoint"
+  type        = string
+  default     = null
+}
+
 variable "git" {
   description = "Name of git repository"
   type        = string
@@ -8,6 +14,12 @@ variable "git_hash" {
   description = "Which hash of the git code to deploy"
   type        = string
   default     = "latest"
+}
+
+variable "enable_alarms" {
+  description = "Enable the CloudWatch metric alarms for failures"
+  type        = bool
+  default     = true
 }
 
 variable "enable_email" {
@@ -53,6 +65,18 @@ variable "metabase_password_kms" {
 variable "metabase_card_id" {
   description = "Metabase card to query"
   type        = string
+}
+
+variable "metric_evaluation_periods" {
+  description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm#evaluation_periods"
+  type        = number
+  default     = 1
+}
+
+variable "metric_period" {
+  description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm#period"
+  type        = number
+  default     = 300 # in seconds
 }
 
 variable "name" {
