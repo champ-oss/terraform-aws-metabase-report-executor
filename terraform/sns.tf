@@ -25,7 +25,7 @@ resource "aws_sns_topic" "alarms" {
   name_prefix = "${var.git}-card-${var.metabase_card_id}-alarms-"
 }
 
-resource "aws_sns_topic_subscription" "this" {
+resource "aws_sns_topic_subscription" "alarms" {
   count      = var.enable_alarms != null ? 1 : 0
   depends_on = [aws_sns_topic.alarms]
   topic_arn  = aws_sns_topic.alarms.arn
