@@ -28,6 +28,7 @@ public class App implements RequestHandler<SNSEvent, Void> {
     private static final String recipients = System.getenv("RECIPIENTS");
     private static final String metabaseCardId = System.getenv("METABASE_CARD_ID");
     private static final String name = System.getenv("NAME");
+    private static final String sizeLimitBytes = System.getenv("SIZE_LIMIT_BYTES");
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final JsonPointer objectKeyPtr = JsonPointer.compile("/Records/0/s3/object/key");
     private final S3Reader s3Reader;
@@ -46,9 +47,7 @@ public class App implements RequestHandler<SNSEvent, Void> {
             String s3Key = parseS3Key(snsRecord.getSNS().getMessage());
             byte[] data = s3Reader.downloadXlsx(s3Key);
             logger.info("downloaded {} bytes", data.length);
-            if (data.length <= 0) {
-                return null;
-            }
+            checkFileSize(data.length);
             emailSender.sendEmail(createSubject(metabaseCardId, name), recipients.split(","), getS3FileName(s3Key), data);
         }
 
@@ -61,7 +60,7 @@ public class App implements RequestHandler<SNSEvent, Void> {
      * @param snsMessage body of SNS message containing an S3 event
      * @return string of S3 key
      */
-    static String parseS3Key(String snsMessage) {
+    private static String parseS3Key(String snsMessage) {
         try {
             logger.info("parsing s3 key from sns message: {}", snsMessage);
             JsonNode root = mapper.readTree(snsMessage);
@@ -79,9 +78,22 @@ public class App implements RequestHandler<SNSEvent, Void> {
      * @param s3Key full S3 path (ex: /one/two/foo.txt)
      * @return file name with extension (ex: foo.txt)
      */
-    static String getS3FileName(String s3Key) {
+    private static String getS3FileName(String s3Key) {
         String[] parts = s3Key.split("/");
         return parts[parts.length - 1];
+    }
+
+    /**
+     * Validate the size of the file is not too large and not empty
+     *
+     * @param byteLength length of the file in bytes
+     */
+    private static void checkFileSize(int byteLength) {
+        if (byteLength <= 0) {
+            throw new RuntimeException("not processing empty file");
+        } else if (byteLength > Integer.parseInt(sizeLimitBytes)) {
+            throw new RuntimeException("file is greater than max allowed size");
+        }
     }
 
     /**
@@ -91,7 +103,7 @@ public class App implements RequestHandler<SNSEvent, Void> {
      * @param name   name for the report
      * @return formatted subject line
      */
-    static String createSubject(String cardId, String name) {
+    private static String createSubject(String cardId, String name) {
         LocalDateTime now = LocalDateTime.now();
         String month = now.format(DateTimeFormatter.ofPattern("MM"));
         String year = now.format(DateTimeFormatter.ofPattern("yyyy"));

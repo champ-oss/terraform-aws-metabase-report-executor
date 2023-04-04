@@ -83,6 +83,12 @@ variable "schedule_expression" {
   default     = "cron(0 7 * * ? *)"
 }
 
+variable "size_limit_bytes" {
+  description = "The maximum allowed size of the file attachment"
+  type        = number
+  default     = 26214400 # 25 MB
+}
+
 variable "smtp_host" {
   description = "SMTP server hostname"
   type        = string
