@@ -19,6 +19,12 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      statuses: write
+      checks: write
     steps:
       - uses: actions/checkout@v3
 
@@ -39,6 +45,28 @@ jobs:
 
       - name: maven test
         run: mvn -B test -Dmaven.test.skip=false -DskipTests=false
+
+      - name: SonarCloud Scan
+        if: ${{ always() }}
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectBaseDir: src
+          args: >
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.organization=champ-oss
+            -Dsonar.projectKey=terraform-aws-metabase-report-executor_champ-oss
+            -Dsonar.binaries=build/classes
+            -Dsonar.scm.provider=git
+            -Dsonar.exclusions=**/src/test/**,src/test/**
+            -Dsonar.language=java
+            -Dsonar.tests=junit
+            -Dsonar.test.inclusions=**/*Test.java
+            -Dsonar.tests=.
+            -Dsonar.java.binaries=/tmp
 
       - name: Generate Surefire Report
         if: ${{ always() }}
@@ -72,20 +100,3 @@ jobs:
           context: src/metabase-report-notifier
           push: true
           tags: champtitles/metabase-report-notifier:${{ env.SHA }}
-
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarqube-scan-action@master
-        with:
-          projectBaseDir: src
-          args: >
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.organization=champ-oss
-            -Dsonar.projectKey=terraform-aws-metabase-report-executor_champ-oss
-            -Dsonar.binaries=build/classes
-            -Dsonar.scm.provider=git
-            -Dsonar.exclusions=**/src/test/**,src/test/**
-            -Dsonar.language=java
-            -Dsonar.tests=junit
-            -Dsonar.test.inclusions=**/*Test.java
-            -Dsonar.tests=.
-            -Dsonar.java.binaries=/tmp
