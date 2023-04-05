@@ -7,33 +7,33 @@ import org.slf4j.LoggerFactory;
 
 public class App implements RequestHandler<Object, Object> {
 
-    private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
-    private static final String awsRegion = System.getenv("AWS_REGION");
-    private static final String bucket = System.getenv("BUCKET");
-    private static final String metabaseUrl = System.getenv("METABASE_URL");
-    private static final String metabaseUsername = System.getenv("METABASE_USERNAME");
-    private static final String metabasePasswordKms = System.getenv("METABASE_PASSWORD_KMS");
-    private static final String metabaseCardId = System.getenv("METABASE_CARD_ID");
-    private static final String metabaseDeviceUuid = System.getenv("METABASE_DEVICE_UUID");
+    private static final Logger LOGGER = LoggerFactory.getLogger(App.class.getName());
+    private static final String AWS_REGION = System.getenv("AWS_REGION");
+    private static final String BUCKET = System.getenv("BUCKET");
+    private static final String METABASE_URL = System.getenv("METABASE_URL");
+    private static final String METABASE_USERNAME = System.getenv("METABASE_USERNAME");
+    private static final String METABASE_PASSWORD_KMS = System.getenv("METABASE_PASSWORD_KMS");
+    private static final String METABASE_CARD_ID = System.getenv("METABASE_CARD_ID");
+    private static final String METABASE_DEVICE_UUID = System.getenv("METABASE_DEVICE_UUID");
     private final MetabaseClient metabaseClient;
     private final S3Writer s3Writer;
 
     public App() {
-        KmsDecrypt kmsDecrypt = new KmsDecrypt(awsRegion);
-        metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, kmsDecrypt.decrypt(metabasePasswordKms), metabaseDeviceUuid);
-        s3Writer = new S3Writer(bucket);
+        KmsDecrypt kmsDecrypt = new KmsDecrypt(AWS_REGION);
+        metabaseClient = new MetabaseClient(METABASE_URL, METABASE_USERNAME, kmsDecrypt.decrypt(METABASE_PASSWORD_KMS), METABASE_DEVICE_UUID);
+        s3Writer = new S3Writer(BUCKET);
     }
 
     @Override
     public String handleRequest(Object event, Context context) {
-        logger.info("logging in to metabase: {}", metabaseUrl);
+        LOGGER.info("logging in to metabase: {}", METABASE_URL);
         metabaseClient.loginAndGetSession();
 
-        logger.info("running query for card: {}", metabaseCardId);
-        byte[] xlsxBody = metabaseClient.queryCardGetXlsx(metabaseCardId);
-        s3Writer.uploadXlsx(xlsxBody, "card" + metabaseCardId);
+        LOGGER.info("running query for card: {}", METABASE_CARD_ID);
+        byte[] xlsxBody = metabaseClient.queryCardGetXlsx(METABASE_CARD_ID);
+        s3Writer.uploadXlsx(xlsxBody, "card" + METABASE_CARD_ID);
 
-        logger.info("done processing card: {}", metabaseCardId);
+        LOGGER.info("done processing card: {}", METABASE_CARD_ID);
         return null;
     }
 

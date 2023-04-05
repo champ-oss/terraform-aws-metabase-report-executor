@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import java.io.IOException;
 
 public class S3Reader {
-    private static final Logger logger = LoggerFactory.getLogger(S3Reader.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(S3Reader.class.getName());
     private final S3Client s3Client;
     private final String bucket;
 
@@ -35,14 +35,14 @@ public class S3Reader {
                 .key(s3Key)
                 .build();
 
-        logger.info("downloading file: s3://{}/{}", bucket, s3Key);
+        LOGGER.info("downloading file: s3://{}/{}", bucket, s3Key);
         ResponseInputStream<GetObjectResponse> getObjectResponse = s3Client.getObject(getObjectRequest);
 
         try {
             return getObjectResponse.readAllBytes();
 
         } catch (IOException e) {
-            logger.error("error downloading {} from bucket {}", s3Key, bucket);
+            LOGGER.error("error downloading {} from bucket {}", s3Key, bucket);
             throw new RuntimeException(e);
         }
     }

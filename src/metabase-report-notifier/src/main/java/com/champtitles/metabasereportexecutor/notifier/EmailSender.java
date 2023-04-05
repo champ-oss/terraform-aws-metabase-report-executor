@@ -15,7 +15,7 @@ import java.util.Properties;
 
 public class EmailSender {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmailSender.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailSender.class.getName());
     private final Session session;
     private final String fromAddress;
     private final EmailTransport emailTransport;
@@ -48,7 +48,7 @@ public class EmailSender {
      * @param xlsxData   contents of the xlsx file attachment
      */
     public void sendEmail(String subject, String[] recipients, String fileName, byte[] xlsxData) {
-        logger.info("creating email message");
+        LOGGER.info("creating email message");
         Message message = new MimeMessage(session);
         setFromAddress(message);
         setRecipients(message, recipients);
@@ -64,11 +64,11 @@ public class EmailSender {
      */
     private void send(Message message) {
         try {
-            logger.info("sending email");
+            LOGGER.info("sending email");
             emailTransport.send(message);
 
         } catch (MessagingException e) {
-            logger.error("failed to send email message");
+            LOGGER.error("failed to send email message");
             throw new RuntimeException(e);
         }
     }
@@ -80,11 +80,11 @@ public class EmailSender {
      */
     private void setFromAddress(Message message) {
         try {
-            logger.info("using from address: {}", fromAddress);
+            LOGGER.info("using from address: {}", fromAddress);
             message.setFrom(new InternetAddress(fromAddress));
 
         } catch (MessagingException e) {
-            logger.error("invalid from address: {}", fromAddress);
+            LOGGER.error("invalid from address: {}", fromAddress);
             throw new RuntimeException(e);
         }
     }
@@ -98,11 +98,11 @@ public class EmailSender {
     private static void setRecipients(Message message, String[] recipients) {
         for (String recipient : recipients) {
             try {
-                logger.info("adding recipient: {}", recipient);
+                LOGGER.info("adding recipient: {}", recipient);
                 message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
 
             } catch (MessagingException e) {
-                logger.error("invalid recipient address: {}", recipient);
+                LOGGER.error("invalid recipient address: {}", recipient);
                 throw new RuntimeException(e);
             }
         }
@@ -116,11 +116,11 @@ public class EmailSender {
      */
     private static void setSubject(Message message, String subject) {
         try {
-            logger.info("setting email subject: {}", subject);
+            LOGGER.info("setting email subject: {}", subject);
             message.setSubject(subject);
 
         } catch (MessagingException e) {
-            logger.error("invalid subject text: {}", subject);
+            LOGGER.error("invalid subject text: {}", subject);
             throw new RuntimeException(e);
         }
     }
@@ -133,7 +133,7 @@ public class EmailSender {
      * @param xlsxData data contents of the xlsx file
      */
     private static void setAttachment(Message message, String fileName, byte[] xlsxData) {
-        logger.info("creating email attachment for file: {}", fileName);
+        LOGGER.info("creating email attachment for file: {}", fileName);
 
         try {
             // Create a multipart/alternative child container.
@@ -172,7 +172,7 @@ public class EmailSender {
             mimeMultipartMixed.addBodyPart(mimeBodyPartAttachment);
 
         } catch (MessagingException e) {
-            logger.error("failed to create email attachment from file: {}", fileName);
+            LOGGER.error("failed to create email attachment from file: {}", fileName);
             throw new RuntimeException(e);
         }
 
@@ -188,7 +188,7 @@ public class EmailSender {
      * @return Properties object
      */
     private static Properties createSmtpProperties(String smtpHost, String smtpPort, String smtpUser, String smtpPassword) {
-        logger.info("configuring smtp server properties. host={} port={}", smtpHost, smtpPort);
+        LOGGER.info("configuring smtp server properties. host={} port={}", smtpHost, smtpPort);
         Properties properties = new Properties();
         properties.put("mail.smtp.host", smtpHost);
         properties.put("mail.smtp.port", smtpPort);

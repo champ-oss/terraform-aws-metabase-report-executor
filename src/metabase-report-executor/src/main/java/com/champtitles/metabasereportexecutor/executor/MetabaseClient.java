@@ -17,8 +17,8 @@ import java.net.http.HttpResponse;
 import static java.net.http.HttpClient.Version.HTTP_1_1;
 
 public class MetabaseClient {
-    private static final Logger logger = LoggerFactory.getLogger(MetabaseClient.class.getName());
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetabaseClient.class.getName());
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final String baseUrl;
     private final String email;
     private final String password;
@@ -72,9 +72,9 @@ public class MetabaseClient {
         String response = sendHttpRequestGetString(httpRequest, 200);
 
         try {
-            return objectMapper.readValue(response, SessionPropertiesResponse.class);
+            return OBJECT_MAPPER.readValue(response, SessionPropertiesResponse.class);
         } catch (JsonProcessingException e) {
-            logger.error("failed to parse session properties response: {}", response);
+            LOGGER.error("failed to parse session properties response: {}", response);
             throw new RuntimeException(e);
         }
     }
@@ -97,7 +97,7 @@ public class MetabaseClient {
                 .POST(createBody(setupRequest))
                 .build();
         String response = sendHttpRequestGetString(httpRequest, 200);
-        logger.info("setup response: {}", response);
+        LOGGER.info("setup response: {}", response);
     }
 
     /**
@@ -120,14 +120,14 @@ public class MetabaseClient {
         String response = sendHttpRequestGetString(httpRequest, 200);
 
         try {
-            SessionResponse sessionResponse = objectMapper.readValue(response, SessionResponse.class);
-            logger.info("logged in successfully");
-            logger.debug("session id: {}", sessionResponse.id());
+            SessionResponse sessionResponse = OBJECT_MAPPER.readValue(response, SessionResponse.class);
+            LOGGER.info("logged in successfully");
+            LOGGER.debug("session id: {}", sessionResponse.id());
             sessionId = sessionResponse.id();
             return sessionResponse.id();
 
         } catch (JsonProcessingException e) {
-            logger.error("failed to parse session properties response: {}", response);
+            LOGGER.error("failed to parse session properties response: {}", response);
             throw new RuntimeException(e);
         }
     }
@@ -159,12 +159,12 @@ public class MetabaseClient {
         String response = sendHttpRequestGetString(httpRequest, 202);
 
         try {
-            CreateCardResponse createCardResponse = objectMapper.readValue(response, CreateCardResponse.class);
-            logger.info("card created successfully: {}", createCardResponse.id());
+            CreateCardResponse createCardResponse = OBJECT_MAPPER.readValue(response, CreateCardResponse.class);
+            LOGGER.info("card created successfully: {}", createCardResponse.id());
             return createCardResponse.id();
 
         } catch (JsonProcessingException e) {
-            logger.error("failed to parse create card response: {}", response);
+            LOGGER.error("failed to parse create card response: {}", response);
             throw new RuntimeException(e);
         }
     }
@@ -190,7 +190,7 @@ public class MetabaseClient {
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build();
         byte[] response = sendHttpRequestGetBytes(httpRequest, 200);
-        logger.info("query card response size in bytes={}", response.length);
+        LOGGER.info("query card response size in bytes={}", response.length);
         return response;
     }
 
@@ -204,7 +204,7 @@ public class MetabaseClient {
         try {
             return new URI(baseUrl + path);
         } catch (URISyntaxException e) {
-            logger.error("unable to create URI from string: {}{}", baseUrl, path);
+            LOGGER.error("unable to create URI from string: {}{}", baseUrl, path);
             throw new RuntimeException(e);
         }
     }
@@ -218,19 +218,19 @@ public class MetabaseClient {
      */
     private String sendHttpRequestGetString(HttpRequest httpRequest, Integer expectedStatusCode) {
         try {
-            logger.info("sending HTTP {} request to {}", httpRequest.method(), httpRequest.uri());
+            LOGGER.info("sending HTTP {} request to {}", httpRequest.method(), httpRequest.uri());
             HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != expectedStatusCode) {
-                logger.error("expected {} response but received {}", expectedStatusCode, response.statusCode());
-                logger.error("response body: {}", response.body());
+                LOGGER.error("expected {} response but received {}", expectedStatusCode, response.statusCode());
+                LOGGER.error("response body: {}", response.body());
                 throw new RuntimeException("unexpected response status code from HTTP request");
             }
 
             return response.body();
 
         } catch (IOException | InterruptedException e) {
-            logger.error("HTTP request failed");
+            LOGGER.error("HTTP request failed");
             throw new RuntimeException(e);
         }
     }
@@ -244,19 +244,19 @@ public class MetabaseClient {
      */
     private byte[] sendHttpRequestGetBytes(HttpRequest httpRequest, Integer expectedStatusCode) {
         try {
-            logger.info("sending HTTP {} request to {}", httpRequest.method(), httpRequest.uri());
+            LOGGER.info("sending HTTP {} request to {}", httpRequest.method(), httpRequest.uri());
             HttpResponse<byte[]> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
 
             if (response.statusCode() != expectedStatusCode) {
-                logger.error("expected {} response but received {}", expectedStatusCode, response.statusCode());
-                logger.error("response body: {}", response.body());
+                LOGGER.error("expected {} response but received {}", expectedStatusCode, response.statusCode());
+                LOGGER.error("response body: {}", response.body());
                 throw new RuntimeException("unexpected response status code from HTTP request");
             }
 
             return response.body();
 
         } catch (IOException | InterruptedException e) {
-            logger.error("HTTP request failed");
+            LOGGER.error("HTTP request failed");
             throw new RuntimeException(e);
         }
     }
@@ -269,9 +269,9 @@ public class MetabaseClient {
      */
     private <T> HttpRequest.BodyPublisher createBody(Record e) {
         try {
-            return HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(e));
+            return HttpRequest.BodyPublishers.ofString(OBJECT_MAPPER.writeValueAsString(e));
         } catch (JsonProcessingException ex) {
-            logger.error("failed to write object as string {}", e.toString());
+            LOGGER.error("failed to write object as string {}", e.toString());
             throw new RuntimeException(ex);
         }
     }
