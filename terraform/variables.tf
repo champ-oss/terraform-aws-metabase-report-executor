@@ -1,3 +1,9 @@
+variable "alarms_email" {
+  description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription#endpoint"
+  type        = string
+  default     = null
+}
+
 variable "git" {
   description = "Name of git repository"
   type        = string
@@ -8,6 +14,30 @@ variable "git_hash" {
   description = "Which hash of the git code to deploy"
   type        = string
   default     = "latest"
+}
+
+variable "enable_alarms" {
+  description = "Enable the CloudWatch metric alarms for failures"
+  type        = bool
+  default     = false
+}
+
+variable "enable_email" {
+  description = "Enable sending the email"
+  type        = bool
+  default     = true
+}
+
+variable "enable_schedule" {
+  description = "Enable the schedule"
+  type        = bool
+  default     = true
+}
+
+variable "from_address" {
+  description = "Email address to use as sender"
+  type        = string
+  default     = ""
 }
 
 variable "kms_key_arn" {
@@ -37,6 +67,23 @@ variable "metabase_card_id" {
   type        = string
 }
 
+variable "metric_evaluation_periods" {
+  description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm#evaluation_periods"
+  type        = number
+  default     = 1
+}
+
+variable "metric_period" {
+  description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm#period"
+  type        = number
+  default     = 300 # in seconds
+}
+
+variable "name" {
+  description = "name of the report"
+  type        = string
+}
+
 variable "private_subnet_ids" {
   description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_subnet_group#subnet_ids"
   type        = list(string)
@@ -48,10 +95,48 @@ variable "protect" {
   default     = true
 }
 
+variable "recipients" {
+  description = "List of email address recipients"
+  type        = list(string)
+  default     = []
+}
+
 variable "schedule_expression" {
   description = "schedule expression using cron"
   type        = string
   default     = "cron(0 7 * * ? *)"
+}
+
+variable "size_limit_bytes" {
+  description = "The maximum allowed size of the file attachment"
+  type        = number
+  default     = 26214400 # 25 MB
+}
+
+variable "smtp_host" {
+  description = "SMTP server hostname"
+  type        = string
+  default     = ""
+}
+
+variable "smtp_port" {
+  description = "SMTP server port"
+  type        = string
+  default     = ""
+}
+
+variable "smtp_user" {
+  description = "SMTP username"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "smtp_password_kms" {
+  description = "SMTP password (KMS encrypted)"
+  type        = string
+  sensitive   = true
+  default     = ""
 }
 
 variable "tags" {

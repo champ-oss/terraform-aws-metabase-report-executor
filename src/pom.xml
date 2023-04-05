@@ -23,12 +23,12 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-lambda-java-events</artifactId>
-                <version>3.11.0</version>
+                <version>3.11.1</version>
             </dependency>
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-lambda-java-core</artifactId>
-                <version>1.2.1</version>
+                <version>1.2.2</version>
             </dependency>
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
@@ -52,12 +52,12 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.13.4</version>
+                <version>2.14.2</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>2.13.4</version>
+                <version>2.14.2</version>
             </dependency>
 
             <!-- Apache -->
@@ -80,6 +80,13 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>
                 <version>5.2.0</version>
+            </dependency>
+
+            <!-- Javamail -->
+            <dependency>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>javax.mail</artifactId>
+                <version>1.6.2</version>
             </dependency>
 
             <!-- Logging -->

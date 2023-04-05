@@ -38,50 +38,52 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class App {
 
-    private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
-    private static final String metabaseUrl = System.getenv("METABASE_URL");
-    private static final String metabaseUsername = System.getenv("METABASE_USERNAME");
-    private static final String metabasePasswordKms = System.getenv("METABASE_PASSWORD_KMS");
-    private static final String awsRegion = System.getenv("AWS_REGION");
-    private static final String executorFunctionName = System.getenv("EXECUTOR_FUNCTION_NAME");
-    private static final String lambdaExecutorCloudwatchLogGroup = System.getenv("LAMBDA_EXECUTOR_CLOUDWATCH_LOG_GROUP");
-    private static final String bucket = System.getenv("BUCKET");
-    private static final int retries = 90;
-    private static final int delaySeconds = 10;
+    private static final Logger LOGGER = LoggerFactory.getLogger(App.class.getName());
+    private static final String METABASE_URL = System.getenv("METABASE_URL");
+    private static final String METABASE_USERNAME = System.getenv("METABASE_USERNAME");
+    private static final String METABASE_PASSWORD_KMS = System.getenv("METABASE_PASSWORD_KMS");
+    private static final String METABASE_DEVICE_UUID = System.getenv("METABASE_DEVICE_UUID");
+    private static final String AWS_REGION = System.getenv("AWS_REGION");
+    private static final String EXECUTOR_FUNCTION_NAME = System.getenv("EXECUTOR_FUNCTION_NAME");
+    private static final String LAMBDA_EXECUTOR_CLOUDWATCH_LOG_GROUP = System.getenv("LAMBDA_EXECUTOR_CLOUDWATCH_LOG_GROUP");
+    private static final String LAMBDA_NOTIFIER_CLOUDWATCH_LOG_GROUP = System.getenv("LAMBDA_NOTIFIER_CLOUDWATCH_LOG_GROUP");
+    private static final String BUCKET = System.getenv("BUCKET");
+    private static final int RETRIES = 90;
+    private static final int DELAY_SECONDS = 10;
     private static final RetryConfig config = new RetryConfigBuilder()
             .retryOnAnyException()
-            .withMaxNumberOfTries(retries)
-            .withDelayBetweenTries(delaySeconds, ChronoUnit.SECONDS)
+            .withMaxNumberOfTries(RETRIES)
+            .withDelayBetweenTries(DELAY_SECONDS, ChronoUnit.SECONDS)
             .withFixedBackoff()
             .build();
 
     public static void main(String[] args) throws InterruptedException {
-        KmsDecrypt kmsDecrypt = new KmsDecrypt(awsRegion);
-        MetabaseClient metabaseClient = new MetabaseClient(metabaseUrl, metabaseUsername, kmsDecrypt.decrypt(metabasePasswordKms));
+        KmsDecrypt kmsDecrypt = new KmsDecrypt(AWS_REGION);
+        MetabaseClient metabaseClient = new MetabaseClient(METABASE_URL, METABASE_USERNAME, kmsDecrypt.decrypt(METABASE_PASSWORD_KMS), METABASE_DEVICE_UUID);
 
         SessionPropertiesResponse sessionPropertiesResponse = waitForSessionProperties(metabaseClient);
         assertNotNull(sessionPropertiesResponse);
 
         if (StringUtils.isBlank(sessionPropertiesResponse.setupToken())) {
-            logger.info("initial setup has already been completed");
+            LOGGER.info("initial setup has already been completed");
         } else {
-            logger.info("performing initial metabase setup using setup token: {}", sessionPropertiesResponse.setupToken());
+            LOGGER.info("performing initial metabase setup using setup token: {}", sessionPropertiesResponse.setupToken());
             metabaseClient.completeInitialSetup(sessionPropertiesResponse.setupToken());
         }
 
-        logger.info("logging in to metabase: {}", metabaseUrl);
+        LOGGER.info("logging in to metabase: {}", METABASE_URL);
         metabaseClient.loginAndGetSession();
 
-        logger.info("creating a card in metabase for testing");
+        LOGGER.info("creating a card in metabase for testing");
         metabaseClient.createCard("test");
 
-        logger.info("invoking executor lambda");
+        LOGGER.info("invoking executor lambda");
         invokeExecutorLambda();
 
-        logger.info("waiting 30 seconds for executor to run");
+        LOGGER.info("waiting 30 seconds for executor to run");
         Thread.sleep(30 * 1000);
 
-        logger.info("checking xlsx files in s3 bucket: {}", bucket);
+        LOGGER.info("checking xlsx files in s3 bucket: {}", BUCKET);
         List<String> objects = listS3Objects();
         assertTrue(objects.size() > 0);
 
@@ -89,11 +91,27 @@ public class App {
             assertTrue(getXlsxRowCount(s3Key) >= 200);
         }
 
-        logger.info("getting executor lambda logs");
-        String lambdaExecutorCloudwatchLogStream = getCloudWatchLogStream(lambdaExecutorCloudwatchLogGroup);
-        for (String log : getCloudWatchLogs(lambdaExecutorCloudwatchLogStream, lambdaExecutorCloudwatchLogGroup)) {
-            System.out.println(log);
+        LOGGER.info("getting executor lambda logs");
+        boolean executorSuccess = false;
+        String lambdaExecutorCloudwatchLogStream = getCloudWatchLogStream(LAMBDA_EXECUTOR_CLOUDWATCH_LOG_GROUP);
+        for (String log : getCloudWatchLogs(lambdaExecutorCloudwatchLogStream, LAMBDA_EXECUTOR_CLOUDWATCH_LOG_GROUP)) {
+            System.out.println("executor lambda - " + log);
+            if (log.contains("finished processing")) {
+                executorSuccess = true;
+            }
         }
+        assertTrue(executorSuccess);
+
+        LOGGER.info("getting notifier lambda logs");
+        boolean notifierSuccess = false;
+        String lambdaNotifierCloudwatchLogStream = getCloudWatchLogStream(LAMBDA_NOTIFIER_CLOUDWATCH_LOG_GROUP);
+        for (String log : getCloudWatchLogs(lambdaNotifierCloudwatchLogStream, LAMBDA_NOTIFIER_CLOUDWATCH_LOG_GROUP)) {
+            System.out.println("notifier lambda - " + log);
+            if (log.contains("address is not verified")) {
+                notifierSuccess = true;
+            }
+        }
+        assertTrue(notifierSuccess);
     }
 
     /**
@@ -119,12 +137,12 @@ public class App {
      */
     private static void invokeExecutorLambda() {
         LambdaClient awsLambda = LambdaClient.builder()
-                .region(Region.of(awsRegion))
+                .region(Region.of(AWS_REGION))
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
-        InvokeRequest request = InvokeRequest.builder().functionName(executorFunctionName).build();
+        InvokeRequest request = InvokeRequest.builder().functionName(EXECUTOR_FUNCTION_NAME).build();
         InvokeResponse invokeResponse = awsLambda.invoke(request);
-        logger.info("invoke response statusCode={}", invokeResponse.statusCode());
+        LOGGER.info("invoke response statusCode={}", invokeResponse.statusCode());
     }
 
     /**
@@ -132,15 +150,15 @@ public class App {
      */
     private static List<String> listS3Objects() {
         S3Client s3Client = S3Client.builder().build();
-        ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder().bucket(bucket).build();
+        ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder().bucket(BUCKET).build();
         ListObjectsV2Response listObjectsV2Response = s3Client.listObjectsV2(listObjectsV2Request);
 
         List<String> objects = new ArrayList<String>();
         for (S3Object s3Object : listObjectsV2Response.contents()) {
-            logger.info("s3 object: key={} bytes={}", s3Object.key(), s3Object.size());
+            LOGGER.info("s3 object: key={} bytes={}", s3Object.key(), s3Object.size());
             objects.add(s3Object.key());
         }
-        logger.info("found {} files in s3 bucket: {}", objects.size(), bucket);
+        LOGGER.info("found {} files in s3 bucket: {}", objects.size(), BUCKET);
         return objects;
     }
 
@@ -148,21 +166,21 @@ public class App {
      * Download and open the XLSX file from S3 and return the number of rows
      */
     private static int getXlsxRowCount(String s3Key) {
-        logger.info("downloading file s3://{}/{}", bucket, s3Key);
+        LOGGER.info("downloading file s3://{}/{}", BUCKET, s3Key);
         S3Client s3Client = S3Client.builder().build();
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(bucket).key(s3Key).build();
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(BUCKET).key(s3Key).build();
         ResponseInputStream<GetObjectResponse> getObjectResponse = s3Client.getObject(getObjectRequest);
 
         try {
-            logger.info("opening xlsx file");
+            LOGGER.info("opening xlsx file");
             Workbook workbook = new XSSFWorkbook(getObjectResponse);
             Sheet sheet = workbook.getSheetAt(0);
             int rows = sheet.getPhysicalNumberOfRows();
-            logger.info("xlsx file has {} rows", rows);
+            LOGGER.info("xlsx file has {} rows", rows);
             return rows;
 
         } catch (IOException e) {
-            logger.error("unable to open xlsx file: {}", s3Key);
+            LOGGER.error("unable to open xlsx file: {}", s3Key);
             throw new RuntimeException(e);
         }
     }
@@ -176,7 +194,7 @@ public class App {
     private static String getCloudWatchLogStream(String logGroupName) {
         CloudWatchLogsClient cloudWatchLogsClient = CloudWatchLogsClient
                 .builder()
-                .region(Region.of(awsRegion))
+                .region(Region.of(AWS_REGION))
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
 
@@ -201,7 +219,7 @@ public class App {
     private static String[] getCloudWatchLogs(String logStreamName, String logGroupName) {
         CloudWatchLogsClient cloudWatchLogsClient = CloudWatchLogsClient
                 .builder()
-                .region(Region.of(awsRegion))
+                .region(Region.of(AWS_REGION))
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
 

@@ -54,7 +54,7 @@ data "aws_route53_zone" "this" {
 }
 
 module "acm" {
-  source            = "github.com/champ-oss/terraform-aws-acm.git?ref=v1.0.110-61ad6b7"
+  source            = "github.com/champ-oss/terraform-aws-acm.git?ref=v1.0.111-28fcc7c"
   git               = local.git
   domain_name       = local.metabase_host
   create_wildcard   = false
@@ -64,7 +64,7 @@ module "acm" {
 }
 
 module "kms" {
-  source                  = "github.com/champ-oss/terraform-aws-kms.git?ref=v1.0.30-44f94bf"
+  source                  = "github.com/champ-oss/terraform-aws-kms.git?ref=v1.0.31-3fc28eb"
   git                     = local.git
   name                    = "alias/${local.git}-test"
   deletion_window_in_days = 7
@@ -73,7 +73,7 @@ module "kms" {
 }
 
 module "ses_smtp_users" {
-  source = "github.com/champ-oss/terraform-aws-ses-smtp-users?ref=v1.0.2-b03b524"
+  source = "github.com/champ-oss/terraform-aws-ses-smtp-users?ref=v1.0.3-bc261ef"
   git    = local.git
   tags   = local.tags
 }
@@ -98,9 +98,14 @@ resource "random_password" "this" {
   special = false
 }
 
-resource "aws_kms_ciphertext" "this" {
+resource "aws_kms_ciphertext" "metabase_password" {
   key_id    = module.kms.key_id
   plaintext = random_password.this.result
+}
+
+resource "aws_kms_ciphertext" "smtp_password" {
+  key_id    = module.kms.key_id
+  plaintext = module.ses_smtp_users.smtp_password
 }
 
 module "this" {
@@ -109,10 +114,17 @@ module "this" {
   vpc_id                = data.aws_vpcs.this.ids[0]
   metabase_card_id      = "1"
   metabase_url          = local.metabase_url
-  metabase_password_kms = aws_kms_ciphertext.this.ciphertext_blob
+  metabase_password_kms = aws_kms_ciphertext.metabase_password.ciphertext_blob
   metabase_username     = local.metabase_email
   protect               = false
   schedule_expression   = "cron(0 7 * * ? *)"
   tags                  = local.tags
   kms_key_arn           = module.kms.arn
+  name                  = "Test Report"
+  recipients            = ["success@simulator.amazonses.com"]
+  from_address          = "metabase-report@champtitles.com"
+  smtp_host             = "email-smtp.us-east-2.amazonaws.com"
+  smtp_port             = "587"
+  smtp_user             = module.ses_smtp_users.smtp_username
+  smtp_password_kms     = aws_kms_ciphertext.smtp_password.ciphertext_blob
 }

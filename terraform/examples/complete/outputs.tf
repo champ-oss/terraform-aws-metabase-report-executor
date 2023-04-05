@@ -23,6 +23,11 @@ output "lambda_notifier_cloudwatch_log_group" {
   value       = module.this.lambda_notifier_cloudwatch_log_group
 }
 
+output "metabase_device_uuid" {
+  description = "Used as a cookie for metabase requests"
+  value       = module.this.metabase_device_uuid
+}
+
 output "metabase_url" {
   description = "Metabase url"
   value       = local.metabase_url
@@ -36,5 +41,5 @@ output "metabase_username" {
 output "metabase_password_kms" {
   description = "Metabase password"
   sensitive   = true
-  value       = aws_kms_ciphertext.this.ciphertext_blob
+  value       = aws_kms_ciphertext.metabase_password.ciphertext_blob
 }

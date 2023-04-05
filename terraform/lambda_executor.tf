@@ -11,7 +11,7 @@ module "lambda_executor" {
   enable_vpc          = true
   vpc_id              = var.vpc_id
   private_subnet_ids  = var.private_subnet_ids
-  enable_cw_event     = true
+  enable_cw_event     = var.enable_schedule
   schedule_expression = var.schedule_expression
   timeout             = var.timeout
   environment = {
@@ -20,6 +20,7 @@ module "lambda_executor" {
     METABASE_USERNAME     = var.metabase_username
     METABASE_PASSWORD_KMS = var.metabase_password_kms
     METABASE_CARD_ID      = var.metabase_card_id
+    METABASE_DEVICE_UUID  = random_uuid.this.result
     JAVA_TOOL_OPTIONS     = "-Djdk.httpclient.keepalive.timeout=5"
   }
 }
