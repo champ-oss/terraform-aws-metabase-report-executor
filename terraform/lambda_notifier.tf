@@ -12,7 +12,26 @@ module "lambda_notifier" {
   vpc_id             = var.vpc_id
   private_subnet_ids = var.private_subnet_ids
   timeout            = var.timeout
-  environment        = {}
+  environment = {
+    BUCKET            = module.s3.bucket
+    SMTP_HOST         = var.smtp_host
+    SMTP_PORT         = var.smtp_port
+    SMTP_USER         = var.smtp_user
+    SMTP_PASSWORD_KMS = var.smtp_password_kms
+    FROM_ADDRESS      = var.from_address
+    RECIPIENTS        = join(",", var.recipients)
+    METABASE_CARD_ID  = var.metabase_card_id
+    NAME              = var.name
+    SIZE_LIMIT_BYTES  = var.size_limit_bytes
+  }
+}
+
+resource "aws_lambda_permission" "lambda_notifier" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda_notifier.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.this.arn
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_notifier" {

@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 
 public class S3Writer {
 
-    private static final Logger logger = LoggerFactory.getLogger(S3Writer.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(S3Writer.class.getName());
     private final S3Client s3Client;
     private final String bucket;
 
@@ -41,11 +41,11 @@ public class S3Writer {
                 .build();
 
         try {
-            logger.info("uploading {} to bucket {}", key, bucket);
+            LOGGER.info("uploading {} to bucket {}", key, bucket);
             s3Client.putObject(objectRequest, RequestBody.fromBytes(xlsxBody));
 
         } catch (AwsServiceException | SdkClientException e) {
-            logger.error("error uploading {} to bucket {}", key, bucket);
+            LOGGER.error("error uploading {} to bucket {}", key, bucket);
             throw new RuntimeException(e);
         }
     }
