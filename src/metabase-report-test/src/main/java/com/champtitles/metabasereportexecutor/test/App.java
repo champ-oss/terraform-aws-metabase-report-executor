@@ -96,7 +96,7 @@ public class App {
         String lambdaExecutorCloudwatchLogStream = getCloudWatchLogStream(LAMBDA_EXECUTOR_CLOUDWATCH_LOG_GROUP);
         for (String log : getCloudWatchLogs(lambdaExecutorCloudwatchLogStream, LAMBDA_EXECUTOR_CLOUDWATCH_LOG_GROUP)) {
             System.out.println("executor lambda - " + log);
-            if (log.contains("done processing")) {
+            if (log.contains("finished processing")) {
                 executorSuccess = true;
             }
         }
