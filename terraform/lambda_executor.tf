@@ -11,7 +11,7 @@ module "lambda_executor" {
   enable_vpc          = true
   vpc_id              = var.vpc_id
   private_subnet_ids  = var.private_subnet_ids
-  enable_cw_event     = true
+  enable_cw_event     = var.enable_schedule
   schedule_expression = var.schedule_expression
   timeout             = var.timeout
   environment = {
