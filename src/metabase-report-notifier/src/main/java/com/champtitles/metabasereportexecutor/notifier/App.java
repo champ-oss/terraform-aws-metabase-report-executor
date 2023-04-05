@@ -49,9 +49,9 @@ public class App implements RequestHandler<SNSEvent, Void> {
         for (SNSEvent.SNSRecord snsRecord : snsEvent.getRecords()) {
             String s3Key = parseS3Key(snsRecord.getSNS().getMessage());
             byte[] data = s3Reader.downloadXlsx(s3Key);
-            LOGGER.info("downloaded {} bytes", data.length);
+            LOGGER.info("downloaded {} bytes for s3 file: {}", data.length, s3Key);
             checkFileSize(data.length);
-            emailSender.sendEmail(createSubject(METABASE_CARD_ID, NAME), RECIPIENTS.split(","), getS3FileName(s3Key), data);
+            emailSender.sendEmail(createSubject(METABASE_CARD_ID, NAME), RECIPIENTS.split(","), "<html></html>", getS3FileName(s3Key), data);
         }
 
         return null;

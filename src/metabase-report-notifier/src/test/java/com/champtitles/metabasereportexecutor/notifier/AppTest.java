@@ -57,6 +57,7 @@ public class AppTest {
         Mockito.verify(emailSender).sendEmail(
                 Mockito.contains("1: Test For "),
                 Mockito.eq(new String[]{"test@example.com"}),
+                Mockito.eq("<html></html>"),
                 Mockito.eq("card-1_2011-12-03T10_15_30.xlsx"),
                 Mockito.eq("data".getBytes()));
     }

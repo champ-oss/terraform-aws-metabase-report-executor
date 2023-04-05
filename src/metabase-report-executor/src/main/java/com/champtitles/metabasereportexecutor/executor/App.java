@@ -33,7 +33,7 @@ public class App implements RequestHandler<Object, Object> {
         byte[] xlsxBody = metabaseClient.queryCardGetXlsx(METABASE_CARD_ID);
         s3Writer.uploadXlsx(xlsxBody, "card" + METABASE_CARD_ID);
 
-        LOGGER.info("done processing card: {}", METABASE_CARD_ID);
+        LOGGER.info("finished processing card {} and uploaded to bucket: {}", METABASE_CARD_ID, BUCKET);
         return null;
     }
 

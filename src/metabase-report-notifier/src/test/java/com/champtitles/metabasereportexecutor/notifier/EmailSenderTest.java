@@ -22,7 +22,7 @@ public class EmailSenderTest {
 
         byte[] data = "data".getBytes();
 
-        emailSender.sendEmail("test subject", recipients, "test.xlsx", data);
+        emailSender.sendEmail("test subject", recipients, "<html></html>", "test.xlsx", data);
 
         Mockito.verify(emailTransport, Mockito.times(1)).send(Mockito.argThat(message -> {
             try {

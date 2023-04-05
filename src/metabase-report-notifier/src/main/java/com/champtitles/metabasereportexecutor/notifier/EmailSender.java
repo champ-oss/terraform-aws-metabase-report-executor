@@ -47,13 +47,12 @@ public class EmailSender {
      * @param fileName   name of the xlsx file attachment
      * @param xlsxData   contents of the xlsx file attachment
      */
-    public void sendEmail(String subject, String[] recipients, String fileName, byte[] xlsxData) {
-        LOGGER.info("creating email message");
+    public void sendEmail(String subject, String[] recipients, String htmlBody, String fileName, byte[] xlsxData) {
         Message message = new MimeMessage(session);
         setFromAddress(message);
         setRecipients(message, recipients);
         setSubject(message, subject);
-        setAttachment(message, fileName, xlsxData);
+        setContent(message, htmlBody, fileName, xlsxData);
         send(message);
     }
 
@@ -126,50 +125,39 @@ public class EmailSender {
     }
 
     /**
-     * Add the xlsx file attachment to the email message
+     * Set the body of the email and add the xlsx file attachment to the message
      *
      * @param message  email message
+     * @param htmlBody body of the email formatted with HTML
      * @param fileName name of the xlsx file
      * @param xlsxData data contents of the xlsx file
      */
-    private static void setAttachment(Message message, String fileName, byte[] xlsxData) {
+    private static void setContent(Message message, String htmlBody, String fileName, byte[] xlsxData) {
         LOGGER.info("creating email attachment for file: {}", fileName);
 
         try {
-            // Create a multipart/alternative child container.
-            MimeMultipart mimeMultipartAlternative = new MimeMultipart("alternative");
-
-            // Create a wrapper for the HTML and text parts.
-            MimeBodyPart mimeBodyPartWrapper = new MimeBodyPart();
-
-            // Define the HTML part.
+            // Create the HTML body
             MimeBodyPart mimeBodyPartHtml = new MimeBodyPart();
-            mimeBodyPartHtml.setContent("<html></html>", "text/html; charset=UTF-8");
-
-            // Add the HTML parts to the child container.
-            // msgBody.addBodyPart(textPart);
+            mimeBodyPartHtml.setContent(htmlBody, "text/html; charset=UTF-8");
+            MimeMultipart mimeMultipartAlternative = new MimeMultipart("alternative");
             mimeMultipartAlternative.addBodyPart(mimeBodyPartHtml);
 
-            // Add the child container to the wrapper object.
+            // Add the child container to the wrapper object
+            MimeBodyPart mimeBodyPartWrapper = new MimeBodyPart();
             mimeBodyPartWrapper.setContent(mimeMultipartAlternative);
 
-            // Create a multipart/mixed parent container.
+            // Create the parent mixed container and add the wrapper container
             MimeMultipart mimeMultipartMixed = new MimeMultipart("mixed");
-
-            // Add the parent container to the message.
-            message.setContent(mimeMultipartMixed);
-
-            // Add the multipart/alternative part to the message.
             mimeMultipartMixed.addBodyPart(mimeBodyPartWrapper);
 
-            // Define the attachment.
+            // Create the attachment as an XLSX document
             MimeBodyPart mimeBodyPartAttachment = new MimeBodyPart();
             DataSource dataSource = new ByteArrayDataSource(xlsxData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             mimeBodyPartAttachment.setDataHandler(new DataHandler(dataSource));
             mimeBodyPartAttachment.setFileName(fileName);
-
-            // Add the attachment to the message.
             mimeMultipartMixed.addBodyPart(mimeBodyPartAttachment);
+
+            message.setContent(mimeMultipartMixed);
 
         } catch (MessagingException e) {
             LOGGER.error("failed to create email attachment from file: {}", fileName);
