@@ -15,10 +15,14 @@ module "hash" {
   fallback = var.git_hash
 }
 
+# Used to uniquely name resources
 resource "random_string" "this" {
   length  = 5
   special = false
   upper   = false
   lower   = true
-  number  = true
+  numeric = true
 }
+
+# Used as a cookie for metabase requests
+resource "random_uuid" "this" {}

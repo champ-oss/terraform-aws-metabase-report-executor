@@ -28,6 +28,11 @@ output "executor_function_name" {
   value       = module.lambda_executor.function_name
 }
 
+output "metabase_device_uuid" {
+  description = "Used as a cookie for metabase requests"
+  value       = random_uuid.this.result
+}
+
 output "private_subnet_ids" {
   description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_subnet_group#subnet_ids"
   value       = var.private_subnet_ids
