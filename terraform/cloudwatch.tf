@@ -10,6 +10,7 @@ resource "aws_cloudwatch_metric_alarm" "executor" {
   threshold           = 1
   alarm_actions       = [aws_sns_topic.this.arn]
   ok_actions          = [aws_sns_topic.this.arn]
+  treat_missing_data  = var.treat_missing_data
   tags                = merge(local.tags, var.tags)
 
   dimensions = {
@@ -29,6 +30,7 @@ resource "aws_cloudwatch_metric_alarm" "notifier" {
   threshold           = 1
   alarm_actions       = [aws_sns_topic.this.arn]
   ok_actions          = [aws_sns_topic.this.arn]
+  treat_missing_data  = var.treat_missing_data
   tags                = merge(local.tags, var.tags)
 
   dimensions = {
