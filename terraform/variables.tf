@@ -151,6 +151,12 @@ variable "timeout" {
   default     = 900
 }
 
+variable "treat_missing_data" {
+  description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm#treat_missing_data"
+  type        = string
+  default     = "ignore"
+}
+
 variable "vpc_id" {
   description = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group#vpc_id"
   type        = string
