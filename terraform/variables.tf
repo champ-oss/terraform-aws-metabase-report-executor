@@ -4,6 +4,12 @@ variable "alarms_email" {
   default     = null
 }
 
+variable "body" {
+  description = "HTML email body"
+  type        = string
+  default     = "<html></html>"
+}
+
 variable "git" {
   description = "Name of git repository"
   type        = string

@@ -29,6 +29,7 @@ public class App implements RequestHandler<SNSEvent, Void> {
     private static final String METABASE_CARD_ID = System.getenv().getOrDefault("METABASE_CARD_ID", "1");
     private static final String NAME = System.getenv().getOrDefault("NAME", "Test");
     private static final String SIZE_LIMIT_BYTES = System.getenv().getOrDefault("SIZE_LIMIT_BYTES", "26214400");
+    private static final String BODY = System.getenv().getOrDefault("BODY", "<html></html>");
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final JsonPointer OBJECT_KEY_PTR = JsonPointer.compile("/Records/0/s3/object/key");
     private final S3Reader s3Reader;
@@ -51,7 +52,7 @@ public class App implements RequestHandler<SNSEvent, Void> {
             byte[] data = s3Reader.downloadXlsx(s3Key);
             LOGGER.info("downloaded {} bytes for s3 file: {}", data.length, s3Key);
             checkFileSize(data.length);
-            emailSender.sendEmail(createSubject(METABASE_CARD_ID, NAME), RECIPIENTS.split(","), "<html></html>", getS3FileName(s3Key), data);
+            emailSender.sendEmail(createSubject(METABASE_CARD_ID, NAME), RECIPIENTS.split(","), BODY, getS3FileName(s3Key), data);
         }
 
         return null;

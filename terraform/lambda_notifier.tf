@@ -23,6 +23,7 @@ module "lambda_notifier" {
     METABASE_CARD_ID  = var.metabase_card_id
     NAME              = var.name
     SIZE_LIMIT_BYTES  = var.size_limit_bytes
+    BODY              = var.body
   }
 }
 
