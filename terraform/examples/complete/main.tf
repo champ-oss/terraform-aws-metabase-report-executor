@@ -73,7 +73,7 @@ module "kms" {
 }
 
 module "ses_smtp_users" {
-  source = "github.com/champ-oss/terraform-aws-ses-smtp-users?ref=v1.0.3-bc261ef"
+  source = "github.com/champ-oss/terraform-aws-ses-smtp-users?ref=v1.0.4-ee8b122"
   git    = local.git
   tags   = local.tags
 }
