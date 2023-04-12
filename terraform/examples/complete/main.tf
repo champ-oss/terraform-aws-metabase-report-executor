@@ -79,7 +79,7 @@ module "ses_smtp_users" {
 }
 
 module "metabase" {
-  source              = "github.com/champ-oss/terraform-aws-metabase.git?ref=v1.0.69-27ec655"
+  source              = "github.com/champ-oss/terraform-aws-metabase.git?ref=v1.0.71-c42c93b"
   id                  = local.name
   public_subnet_ids   = data.aws_subnets.public.ids
   private_subnet_ids  = data.aws_subnets.private.ids
