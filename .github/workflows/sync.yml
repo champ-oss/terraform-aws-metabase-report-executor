@@ -18,10 +18,10 @@ jobs:
           token: ${{ secrets.ACTION_TOKEN }}
           repo: champ-oss/terraform-module-template
           files: |
-            .gitignore
             LICENSE
             .tflint.hcl
-            .github/CODEOWNERS
-            .github/dependabot.yml
             .github/workflows/lint.yml
+            .github/workflows/module.yml
             .github/workflows/release.yml
+            .github/workflows/sonar.yml
+            .github/workflows/combine-prs.yml
