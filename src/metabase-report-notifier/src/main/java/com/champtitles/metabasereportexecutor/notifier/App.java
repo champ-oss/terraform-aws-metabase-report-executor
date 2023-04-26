@@ -28,8 +28,9 @@ public class App implements RequestHandler<SNSEvent, Void> {
     private static final String RECIPIENTS = System.getenv().getOrDefault("RECIPIENTS", "test@example.com");
     private static final String METABASE_CARD_ID = System.getenv().getOrDefault("METABASE_CARD_ID", "1");
     private static final String NAME = System.getenv().getOrDefault("NAME", "Test");
+    private static final boolean INCLUDE_CARD_IN_SUBJECT = Boolean.parseBoolean(System.getenv().getOrDefault("INCLUDE_CARD_IN_SUBJECT", "false"));
     private static final String SIZE_LIMIT_BYTES = System.getenv().getOrDefault("SIZE_LIMIT_BYTES", "26214400");
-    private static final String BODY = System.getenv().getOrDefault("BODY", "<html></html>");
+    private static final String BODY = System.getenv().getOrDefault("BODY", "");
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final JsonPointer OBJECT_KEY_PTR = JsonPointer.compile("/Records/0/s3/object/key");
     private final S3Reader s3Reader;
@@ -52,7 +53,7 @@ public class App implements RequestHandler<SNSEvent, Void> {
             byte[] data = s3Reader.downloadXlsx(s3Key);
             LOGGER.info("downloaded {} bytes for s3 file: {}", data.length, s3Key);
             checkFileSize(data.length);
-            emailSender.sendEmail(createSubject(METABASE_CARD_ID, NAME), RECIPIENTS.split(","), BODY, getS3FileName(s3Key), data);
+            emailSender.sendEmail(createSubject(METABASE_CARD_ID, NAME, INCLUDE_CARD_IN_SUBJECT), RECIPIENTS.split(","), createHtmlBody(BODY), getS3FileName(s3Key), data);
         }
 
         return null;
@@ -107,10 +108,35 @@ public class App implements RequestHandler<SNSEvent, Void> {
      * @param name   name for the report
      * @return formatted subject line
      */
-    private static String createSubject(String cardId, String name) {
+    private static String createSubject(String cardId, String name, boolean includeCardId) {
         LocalDateTime now = LocalDateTime.now();
         String month = now.format(DateTimeFormatter.ofPattern("MM"));
         String year = now.format(DateTimeFormatter.ofPattern("yyyy"));
-        return cardId + ": " + name + " For " + month + " " + year;
+
+        String card = "";
+        if (includeCardId) {
+            card = cardId + ": ";
+        }
+
+        return card + name + " For " + month + " " + year;
+    }
+
+    /**
+     * Create an email HTML body from the provided body
+     *
+     * @param body content for the email body
+     * @return html body
+     */
+    private String createHtmlBody(String body) {
+        String htmlBody = body;
+
+        if (!htmlBody.startsWith("<html>")) {
+            htmlBody = "<html>" + htmlBody;
+        }
+        if (!htmlBody.endsWith("</html>")) {
+            htmlBody = htmlBody + "</html>";
+        }
+
+        return htmlBody;
     }
 }

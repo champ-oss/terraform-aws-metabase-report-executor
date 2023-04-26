@@ -10,18 +10,6 @@ variable "body" {
   default     = "<html></html>"
 }
 
-variable "git" {
-  description = "Name of git repository"
-  type        = string
-  default     = "terraform-aws-metabase-report-executor"
-}
-
-variable "git_hash" {
-  description = "Which hash of the git code to deploy"
-  type        = string
-  default     = "latest"
-}
-
 variable "enable_alarms" {
   description = "Enable the CloudWatch metric alarms for failures"
   type        = bool
@@ -44,6 +32,24 @@ variable "from_address" {
   description = "Email address to use as sender"
   type        = string
   default     = ""
+}
+
+variable "git" {
+  description = "Name of git repository"
+  type        = string
+  default     = "terraform-aws-metabase-report-executor"
+}
+
+variable "git_hash" {
+  description = "Which hash of the git code to deploy"
+  type        = string
+  default     = "latest"
+}
+
+variable "include_card_in_subject" {
+  description = "Enables Card information to be added to email subject"
+  type        = bool
+  default     = false
 }
 
 variable "kms_key_arn" {

@@ -55,7 +55,7 @@ public class AppTest {
         Mockito.verify(s3Reader).downloadXlsx("2023/04/04/12/card-1_2011-12-03T10_15_30.xlsx");
 
         Mockito.verify(emailSender).sendEmail(
-                Mockito.contains("1: Test For "),
+                Mockito.contains("Test For "),
                 Mockito.eq(new String[]{"test@example.com"}),
                 Mockito.eq("<html></html>"),
                 Mockito.eq("card-1_2011-12-03T10_15_30.xlsx"),
