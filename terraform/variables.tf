@@ -4,16 +4,10 @@ variable "alarms_email" {
   default     = null
 }
 
-variable "git" {
-  description = "Name of git repository"
+variable "body" {
+  description = "HTML email body"
   type        = string
-  default     = "terraform-aws-metabase-report-executor"
-}
-
-variable "git_hash" {
-  description = "Which hash of the git code to deploy"
-  type        = string
-  default     = "latest"
+  default     = "<html></html>"
 }
 
 variable "enable_alarms" {
@@ -38,6 +32,24 @@ variable "from_address" {
   description = "Email address to use as sender"
   type        = string
   default     = ""
+}
+
+variable "git" {
+  description = "Name of git repository"
+  type        = string
+  default     = "terraform-aws-metabase-report-executor"
+}
+
+variable "git_hash" {
+  description = "Which hash of the git code to deploy"
+  type        = string
+  default     = "latest"
+}
+
+variable "include_card_in_subject" {
+  description = "Enables Card information to be added to email subject"
+  type        = bool
+  default     = false
 }
 
 variable "kms_key_arn" {

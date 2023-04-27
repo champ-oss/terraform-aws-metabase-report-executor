@@ -73,13 +73,13 @@ module "kms" {
 }
 
 module "ses_smtp_users" {
-  source = "github.com/champ-oss/terraform-aws-ses-smtp-users?ref=v1.0.3-bc261ef"
+  source = "github.com/champ-oss/terraform-aws-ses-smtp-users?ref=v1.0.6-74f8142"
   git    = local.git
   tags   = local.tags
 }
 
 module "metabase" {
-  source              = "github.com/champ-oss/terraform-aws-metabase.git?ref=v1.0.69-27ec655"
+  source              = "github.com/champ-oss/terraform-aws-metabase.git?ref=v1.0.71-c42c93b"
   id                  = local.name
   public_subnet_ids   = data.aws_subnets.public.ids
   private_subnet_ids  = data.aws_subnets.private.ids
