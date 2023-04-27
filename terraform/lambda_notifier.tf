@@ -1,5 +1,5 @@
 module "lambda_notifier" {
-  source             = "github.com/champ-oss/terraform-aws-lambda.git?ref=v1.0.114-72d2e3f"
+  source             = "github.com/champ-oss/terraform-aws-lambda.git?ref=v1.0.115-77403a9"
   git                = var.git
   name               = "card-${var.metabase_card_id}-notifier-${random_string.this.result}"
   sync_image         = true
@@ -13,16 +13,18 @@ module "lambda_notifier" {
   private_subnet_ids = var.private_subnet_ids
   timeout            = var.timeout
   environment = {
-    BUCKET            = module.s3.bucket
-    SMTP_HOST         = var.smtp_host
-    SMTP_PORT         = var.smtp_port
-    SMTP_USER         = var.smtp_user
-    SMTP_PASSWORD_KMS = var.smtp_password_kms
-    FROM_ADDRESS      = var.from_address
-    RECIPIENTS        = join(",", var.recipients)
-    METABASE_CARD_ID  = var.metabase_card_id
-    NAME              = var.name
-    SIZE_LIMIT_BYTES  = var.size_limit_bytes
+    BUCKET                  = module.s3.bucket
+    SMTP_HOST               = var.smtp_host
+    SMTP_PORT               = var.smtp_port
+    SMTP_USER               = var.smtp_user
+    SMTP_PASSWORD_KMS       = var.smtp_password_kms
+    FROM_ADDRESS            = var.from_address
+    RECIPIENTS              = join(",", var.recipients)
+    METABASE_CARD_ID        = var.metabase_card_id
+    NAME                    = var.name
+    SIZE_LIMIT_BYTES        = var.size_limit_bytes
+    BODY                    = var.body
+    INCLUDE_CARD_IN_SUBJECT = var.include_card_in_subject
   }
 }
 
