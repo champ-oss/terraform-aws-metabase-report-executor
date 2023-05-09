@@ -1,5 +1,5 @@
 module "lambda_notifier" {
-  source             = "github.com/champ-oss/terraform-aws-lambda.git?ref=v1.0.116-111a99f"
+  source             = "github.com/champ-oss/terraform-aws-lambda.git?ref=v1.0.117-ef377b0"
   git                = var.git
   name               = "card-${var.metabase_card_id}-notifier-${random_string.this.result}"
   sync_image         = true
