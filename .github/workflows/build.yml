@@ -88,14 +88,14 @@ jobs:
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Build and push Executor Docker image
-        uses: docker/build-push-action@v4.0.0
+        uses: docker/build-push-action@v4.1.1
         with:
           context: src/metabase-report-executor
           push: true
           tags: champtitles/metabase-report-executor:${{ env.SHA }}
 
       - name: Build and push Notifier Docker image
-        uses: docker/build-push-action@v4.0.0
+        uses: docker/build-push-action@v4.1.1
         with:
           context: src/metabase-report-notifier
           push: true
