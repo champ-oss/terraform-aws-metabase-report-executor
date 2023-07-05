@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,8 @@ public class App implements RequestHandler<SNSEvent, Void> {
     private static final boolean INCLUDE_CARD_IN_SUBJECT = Boolean.parseBoolean(System.getenv().getOrDefault("INCLUDE_CARD_IN_SUBJECT", "false"));
     private static final String SIZE_LIMIT_BYTES = System.getenv().getOrDefault("SIZE_LIMIT_BYTES", "26214400");
     private static final String BODY = System.getenv().getOrDefault("BODY", "");
+    private static final String FILENAME_ELEMENT_SEPARATOR = "-";
+    private static final String FILENAME_PREFIX = StringUtils.isNotBlank(System.getenv().getOrDefault("FILENAME_PREFIX", "")) ? System.getenv().get("FILENAME_PREFIX") + FILENAME_ELEMENT_SEPARATOR : "";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final JsonPointer OBJECT_KEY_PTR = JsonPointer.compile("/Records/0/s3/object/key");
     private final S3Reader s3Reader;
@@ -53,7 +56,7 @@ public class App implements RequestHandler<SNSEvent, Void> {
             byte[] data = s3Reader.downloadXlsx(s3Key);
             LOGGER.info("downloaded {} bytes for s3 file: {}", data.length, s3Key);
             checkFileSize(data.length);
-            emailSender.sendEmail(createSubject(METABASE_CARD_ID, NAME, INCLUDE_CARD_IN_SUBJECT), RECIPIENTS.split(","), createHtmlBody(BODY), getS3FileName(s3Key), data);
+            emailSender.sendEmail(createSubject(METABASE_CARD_ID, NAME, INCLUDE_CARD_IN_SUBJECT), RECIPIENTS.split(","), createHtmlBody(BODY), getFileName(s3Key), data);
         }
 
         return null;
@@ -78,14 +81,14 @@ public class App implements RequestHandler<SNSEvent, Void> {
     }
 
     /**
-     * Parse an S3 key string into just the file name
+     * Form full file name with base file name from S3 key string
      *
      * @param s3Key full S3 path (ex: /one/two/foo.txt)
-     * @return file name with extension (ex: foo.txt)
+     * @return processed file name with extension (ex: foo.txt)
      */
-    private static String getS3FileName(String s3Key) {
+    private static String getFileName(String s3Key) {
         String[] parts = s3Key.split("/");
-        return parts[parts.length - 1];
+        return FILENAME_PREFIX + parts[parts.length - 1];
     }
 
     /**
