@@ -25,6 +25,7 @@ module "lambda_notifier" {
     SIZE_LIMIT_BYTES        = var.size_limit_bytes
     BODY                    = var.body
     INCLUDE_CARD_IN_SUBJECT = var.include_card_in_subject
+    FILENAME_PREFIX         = var.filename_prefix
   }
 }
 

@@ -28,6 +28,12 @@ variable "enable_schedule" {
   default     = true
 }
 
+variable "filename_prefix" {
+  description = "Prefix for report attachment filename"
+  type        = string
+  default     = ""
+}
+
 variable "from_address" {
   description = "Email address to use as sender"
   type        = string
